@@ -1,0 +1,225 @@
+@model LandIt.Models.AppUser
+
+<div class="app-container" style="max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem;">
+
+    <!-- Page Header -->
+    <a href="/Account/DashboardRouter"
+       style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.25rem;">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Dashboard
+    </a>
+
+    <div style="margin-bottom:1.75rem;">
+        <div class="sec-title" style="font-size:1.3rem;margin:0 0 4px;">My Bookings</div>
+        <div class="step-desc">View and manage your recruiter sessions</div>
+    </div>
+
+    <!-- Bookings List -->
+    @if (Model.Bookings != null && Model.Bookings.Any())
+    {
+        foreach (var booking in Model.Bookings)
+        {
+            var canPay = booking.Status == LandIt.Models.BookingStatus.Confirmed
+                             && booking.PaymentStatus != LandIt.Models.PaymentStatus.Paid;
+            var isPaid = booking.PaymentStatus == LandIt.Models.PaymentStatus.Paid;
+            var isCompleted = booking.Status == LandIt.Models.BookingStatus.Completed;
+            var canReview = isCompleted && booking.RecruiterReview == null;
+            var hasReview = booking.RecruiterReview != null;
+
+            <div class="app-card" style="margin-bottom:1rem;">
+
+                <!-- Booking Row -->
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+
+                    <!-- Icon -->
+                    <div style="width:42px;height:42px;border-radius:10px;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">
+                        <i class="ti ti-calendar-event" aria-hidden="true"></i>
+                    </div>
+
+                    <!-- Info -->
+                    <div style="flex:1;min-width:0;">
+                        <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0 0 2px;">
+                            @booking.Recruiter?.FullName
+                        </p>
+                        <p style="font-size:0.78rem;color:var(--muted);margin:0;">
+                            <i class="ti ti-clock" aria-hidden="true"></i>
+                            @booking.TimeSlot?.StartTime.ToString("MMM dd, yyyy · h:mm tt")
+                        </p>
+                    </div>
+
+                    <!-- Status badges + actions -->
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+
+                        <!-- Booking status -->
+                        <span style="font-size:0.7rem;font-weight:600;padding:4px 10px;border-radius:100px;background:var(--blue-dim);color:var(--blue);">
+                            @booking.Status
+                        </span>
+
+
+                        <!-- Payment -->
+                        @if (isPaid)
+                        {
+                            <span style="font-size:0.7rem;font-weight:600;padding:4px 10px;border-radius:100px;background:rgba(22,163,74,0.12);color:#16a34a;">
+                                <i class="ti ti-check" aria-hidden="true"></i> Paid
+                            </span>
+                        }
+                        else if (canPay)
+                        {
+                            <form asp-controller="Bookings" asp-action="Pay" asp-route-id="@booking.Id" method="post" style="display:inline;margin:0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-primary" style="font-size:0.78rem;padding:6px 14px;">
+                                    Pay $@(booking.Recruiter?.HourlyRate.ToString("0.00"))
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span style="font-size:0.7rem;font-weight:600;padding:4px 10px;border-radius:100px;background:var(--surface2);color:var(--muted2);">
+                                @booking.PaymentStatus
+                            </span>
+                        }
+
+
+                        <!-- Join Meeting -->
+                        @{
+                            var now = DateTime.UtcNow;
+                            var canJoin = booking.Status == LandIt.Models.BookingStatus.Confirmed
+                                       && booking.PaymentStatus == LandIt.Models.PaymentStatus.Paid
+                                       && booking.TimeSlot?.StartTime <= now.AddMinutes(15)
+                                       && booking.TimeSlot?.EndTime >= now;
+
+                            var isUpcoming = booking.Status == LandIt.Models.BookingStatus.Confirmed
+                                          && booking.PaymentStatus == LandIt.Models.PaymentStatus.Paid
+                                          && booking.TimeSlot?.StartTime > now.AddMinutes(15);
+                        }
+
+                        @if (canJoin)
+                        {
+                            <a asp-controller="Bookings"
+                               asp-action="SessionDetail"
+                               asp-route-id="@booking.Id"
+                               class="btn-primary"
+                               style="font-size:0.78rem;padding:6px 14px;display:inline-flex;align-items:center;gap:5px;">
+                                <i class="ti ti-video"></i> Join Session
+                            </a>
+                        }
+                        else if (isUpcoming)
+                        {
+                            <span style="font-size:0.72rem;font-weight:500;padding:4px 10px;border-radius:100px;background:var(--blue-dim);color:var(--blue);display:inline-flex;align-items:center;gap:5px;">
+                                <i class="ti ti-clock"></i>
+                                Starts @booking.TimeSlot?.StartTime.ToString("MMM dd · h:mm tt")
+                            </span>
+                        }
+
+
+                        <!-- Review -->
+                        @if (canReview)
+                        {
+                            <button type="button"
+                                    onclick="document.getElementById('reviewForm-@booking.Id').style.display='block';this.style.display='none';"
+                                    style="font-size:0.78rem;font-weight:600;padding:6px 12px;border-radius:8px;background:rgba(245,158,11,0.15);color:#d97706;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="ti ti-star" aria-hidden="true"></i> Leave review
+                            </button>
+                        }
+                        else if (hasReview)
+                        {
+                            <span style="font-size:0.7rem;font-weight:600;padding:4px 10px;border-radius:100px;background:rgba(245,158,11,0.15);color:#d97706;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="ti ti-star-filled" aria-hidden="true"></i> @booking.RecruiterReview!.Rating
+                            </span>
+                        }
+
+                        
+                        <!-- Cancel -->
+                        @if (booking.Status != LandIt.Models.BookingStatus.Cancelled && !isPaid && !isCompleted)
+                        {
+                            <form asp-controller="Bookings" asp-action="CancelBooking"
+                                  asp-route-id="@booking.Id" method="post"
+                                  onsubmit="return confirm('Are you sure you want to cancel this booking?');"
+                                  style="display:inline;margin:0;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit"
+                                        style="font-size:0.78rem;font-weight:500;color:#ef4444;background:none;cursor:pointer;padding:4px 8px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);font-family:'Inter',sans-serif;">
+                                    Cancel
+                                </button>
+                            </form>
+                        }
+
+                    </div>
+                </div>
+
+                <!-- Review Form -->
+                @if (canReview)
+                {
+                    <form id="reviewForm-@booking.Id"
+                          asp-controller="Bookings"
+                          asp-action="SubmitReview"
+                          method="post"
+                          style="display:none;margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--border);">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="bookingId" value="@booking.Id" />
+
+                        <div style="font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:10px;">
+                            How was your session with @booking.Recruiter?.FullName?
+                        </div>
+
+                        <div style="display:flex;gap:4px;margin-bottom:12px;" class="star-rating" data-target="rating-@booking.Id">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <button type="button" data-value="@i"
+                                        style="background:transparent;border:0;cursor:pointer;font-size:1.6rem;color:#d1d5db;padding:0;line-height:1;">
+                                    <i class="ti ti-star-filled" aria-hidden="true"></i>
+                                </button>
+                            }
+                        </div>
+                        <input type="hidden" name="rating" id="rating-@booking.Id" value="5" />
+
+                        <textarea name="comment" rows="3"
+                                  placeholder="Share your experience..."
+                                  class="app-input"
+                                  style="width:100%;margin-bottom:10px;resize:vertical;"></textarea>
+
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button type="button"
+                                    onclick="this.closest('form').style.display='none';"
+                                    class="btn-ghost"
+                                    style="font-size:0.82rem;padding:6px 14px;">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-primary" style="font-size:0.82rem;padding:6px 14px;">
+                                Submit review
+                            </button>
+                        </div>
+                    </form>
+                }
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="app-card" style="text-align:center;padding:3rem 1rem;">
+            <i class="ti ti-calendar-off" aria-hidden="true" style="font-size:2rem;color:var(--muted);display:block;margin-bottom:0.75rem;"></i>
+            <p style="font-size:0.875rem;color:var(--muted);margin-bottom:1rem;">No bookings yet.</p>
+            <a href="/Account/Dashboard" class="btn-primary">Browse recruiters</a>
+        </div>
+    }
+
+</div>
+
+<script>
+    document.querySelectorAll('.star-rating').forEach(group => {
+        const targetId = group.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const stars = group.querySelectorAll('button');
+        function paint(val) {
+            stars.forEach((s, i) => { s.style.color = (i < val) ? '#f59e0b' : '#d1d5db'; });
+        }
+        stars.forEach(s => {
+            s.addEventListener('click', () => {
+                const v = parseInt(s.getAttribute('data-value'));
+                input.value = v;
+                paint(v);
+            });
+        });
+        paint(parseInt(input.value));
+    });
+</script>

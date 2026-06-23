@@ -1,0 +1,163 @@
+﻿@{
+    ViewData["Title"] = "Recruiters";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section class="hero" style="padding-bottom: 2rem;">
+    <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        Now Accepting Recruiters
+    </div>
+    <h1>
+        Are you a <span class="accent">recruiter</span>?<br>
+        <span class="dim">Turn your expertise into extra income.</span>
+    </h1>
+    <p class="hero-sub">
+        Join LandIt as a recruiter. Help candidates practice interviews, review resumes, and sharpen their skills — all on your own schedule.
+    </p>
+    <div class="hero-ctas">
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <a href="#apply" class="btn-primary" style="text-decoration:none;">Apply to Join</a>
+        }
+        else
+        {
+            <a href="/Account/Register?returnUrl=/Account/Recruiters" class="btn-primary" style="text-decoration:none;">SignUp to Join</a>
+        }
+
+        
+    </div>
+</section>
+
+<section class="features-section" style="padding-top: 2rem;">
+    <div class="sec-eyebrow">Why coach on LandIt</div>
+    <h2 class="sec-title">Earn more. Work less. Help others.</h2>
+
+    <div class="feat-grid">
+        <div class="feat-card">
+            <div class="feat-icon">💰</div>
+            <div class="feat-tag">Income</div>
+            <div class="feat-title">Set Your Own Rate</div>
+            <div class="feat-desc">
+                You control your pricing. Most coaches charge between $29–$80 per hour. Keep the majority of what you earn.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+
+        <div class="feat-card">
+            <div class="feat-icon">📅</div>
+            <div class="feat-tag">Flexibility</div>
+            <div class="feat-title">Work On Your Schedule</div>
+            <div class="feat-desc">
+                No quotas, no minimums. Open your calendar when you want. Candidates book slots that fit your availability.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+
+        <div class="feat-card">
+            <div class="feat-icon">🚀</div>
+            <div class="feat-tag">Growth</div>
+            <div class="feat-title">Build Your Brand</div>
+            <div class="feat-desc">
+                Get a public recruiter profile, collect reviews, and grow a following of job seekers who trust your advice.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+
+        <div class="feat-card">
+            <div class="feat-icon">🛡️</div>
+            <div class="feat-tag">Security</div>
+            <div class="feat-title">We Handle the Rest</div>
+            <div class="feat-desc">
+                Payments, scheduling, reminders, and video links are all managed by us. You just show up and coach.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Apply Form / CTA -->
+<section id="apply" class="cta-section" style="padding-top: 2rem; padding-bottom: 5rem;">
+
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    if (ViewBag.AlreadyApplied == true)
+    {
+        <div class="app-card"
+             style="max-width:480px;margin:0 auto;text-align:center;">
+
+            <div class="feat-icon" style="font-size:2rem;">✅</div>
+
+            <h3 style="margin-top:1rem;">
+                Application Submitted
+            </h3>
+
+            <p class="step-desc">
+                Your recruiter application is currently under review.
+                We’ll contact you once it has been approved.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div style="max-width: 480px; margin: 0 auto;">
+            <form method="post"
+                  asp-controller="Account"
+                  asp-action="ApplyRecruiter"
+                  class="app-card"
+                  style="padding: 0; border: none; background: transparent; text-align: left;">
+
+
+                    <div style="margin-bottom: 1rem;">
+                        <label class="app-label">Company</label>
+                        <input type="text" name="Company" class="app-input" required />
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label class="app-label">Title</label>
+                        <input type="text" name="Title" class="app-input" required />
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label class="app-label">LinkedIn Profile Link</label>
+                        <input type="url"
+                               name="linkedInURL"
+                               class="app-input"
+                               placeholder="https://linkedin.com/in/yourname"
+                               pattern="https://.*linkedin\.com/.*"
+                               title="Please enter a valid LinkedIn URL"
+                               required />
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label class="app-label">Hourly Rate</label>
+                        <input type="number" step="0.01" name="HourlyRate" class="app-input" required />
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label class="app-label">Skills</label>
+                        <small style="display: block; color: var(--muted); margin-bottom: 0.25rem;">
+                            List your skills separated by commas.
+                        </small>
+                        <textarea name="Skills" class="app-input" rows="3"></textarea>
+                    </div>
+
+                    <small>We deduct 10% of your hourly rate to manage all the internal services.</small>
+
+                    <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">
+                        Submit Application
+                    </button>
+
+            </form>
+        </div>
+    }
+}
+    
+</section>
+

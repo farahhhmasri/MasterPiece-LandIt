@@ -1,0 +1,135 @@
+﻿@model LandIt.Models.ViewModels.EditProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["UseBootstrap"] = true;
+    ViewData["HideAds"] = true;
+    ViewData["UseIdentityStyles"] = true;
+}
+
+<div class="app-container">
+
+    <div class="app-card">
+
+        <div style="text-align:center; margin-bottom: 1.5rem;">
+            <h2 class="sec-title" style="margin-bottom: 0.5rem;">Edit Profile</h2>
+            <p class="step-desc">Update your personal information and account settings</p>
+        </div>
+
+        <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- GRID -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+
+                <!-- Full Name -->
+                <div>
+                    <label class="app-label" asp-for="FullName"></label>
+                    <input class="app-input" asp-for="FullName" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="app-label" asp-for="Email"></label>
+                    <input class="app-input" asp-for="Email" readonly />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="app-label" asp-for="PhoneNumber"></label>
+                    <input class="app-input" asp-for="PhoneNumber" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <!-- Region -->
+                <div>
+                    <label class="app-label" asp-for="Region"></label>
+                    <select class="app-input"
+                            asp-for="Region"
+                            asp-items="Html.GetEnumSelectList<Region>()">
+                    </select>
+                    <span asp-validation-for="Region" class="text-danger"></span>
+                </div>
+
+            </div>
+
+
+            <!-- PHOTO SECTION -->
+            <div style="margin-top: 1.5rem;">
+                <label class="app-label">Profile Photo</label>
+
+                @if (!string.IsNullOrEmpty(Model.ExistingPhotoPath))
+                {
+                    <div style="margin-bottom: 0.75rem;">
+                        <img src="@Model.ExistingPhotoPath"
+                             style="width:90px; height:90px; border-radius: 12px; object-fit:cover; border:1px solid var(--border);" />
+                    </div>
+                }
+
+                <input class="app-input"
+                       asp-for="Photo"
+                       type="file"
+                       accept=".jpg,.jpeg,.png" />
+
+                <span asp-validation-for="Photo" class="text-danger"></span>
+            </div>
+
+
+            <!-- PASSWORD SECTION -->
+            <div style="margin-top: 2rem;">
+
+                <div style="margin-bottom: 1rem;">
+                    <div class="sec-eyebrow">Security</div>
+                    <div class="sec-title" style="font-size:1.2rem;">Change Password</div>
+                    <p class="step-desc">Leave empty if you don't want to change your password</p>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+
+                    <div>
+                        <label class="app-label" asp-for="NewPassword"></label>
+                        <input class="app-input"
+                               asp-for="NewPassword"
+                               type="password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+
+                    <div>
+                        <label class="app-label" asp-for="ConfirmPassword"></label>
+                        <input class="app-input"
+                               asp-for="ConfirmPassword"
+                               type="password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="app-label" asp-for="CurrentPassword"></label>
+                    <input class="app-input"
+                           asp-for="CurrentPassword"
+                           type="password"
+                           autocomplete="current-password" />
+                    <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                </div>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+            <div style="margin-top: 2rem; display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn-primary">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

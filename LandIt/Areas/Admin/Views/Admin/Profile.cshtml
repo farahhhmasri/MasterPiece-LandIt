@@ -1,0 +1,31 @@
+@model LandIt.Models.AppUser
+@{
+    ViewData["Title"] = "Profile";
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+}
+
+<div class="page-head">
+    <div>
+        <h1>Profile</h1>
+        <div class="sub">Your administrator account.</div>
+    </div>
+</div>
+
+<div class="card-x" style="max-width:680px;">
+    <div style="display:flex; align-items:center; gap:18px; margin-bottom:18px;">
+        <div class="avatar xl">@Initials(Model.FullName)</div>
+        <div>
+            <h2 style="margin:0;">@Model.FullName</h2>
+            <div style="color:var(--muted); font-size:14px; margin-top:4px;">@Model.Email <span class="badge info" style="margin-left:8px;">Administrator</span></div>
+        </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:14px; padding-top:14px; border-top:1px solid var(--border);">
+        <div><div class="eyebrow" style="margin-bottom:4px;">Username</div><div>@Model.UserName</div></div>
+        <div><div class="eyebrow" style="margin-bottom:4px;">Region</div><div>@Model.Region</div></div>
+        <div><div class="eyebrow" style="margin-bottom:4px;">Joined</div><div>@Model.CreatedAt?.ToString("yyyy-MM-dd")</div></div>
+        <div><div class="eyebrow" style="margin-bottom:4px;">Status</div><div><span class="badge success">Active</span></div></div>
+    </div>
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <a class="btn primary" asp-area="Identity" asp-page="/Account/Manage/Index"><i class="ti ti-settings"></i> Manage account</a>
+    </div>
+</div>

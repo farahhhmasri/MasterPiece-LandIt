@@ -1,0 +1,179 @@
+@model LandIt.Models.Recruiter
+@{
+    ViewData["Title"] = "Recruiter";
+    var avg = Model.Reviews != null && Model.Reviews.Any() ? Model.Reviews.Average(x => x.Rating) : 0;
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+    string Tone(LandIt.Models.RecruiterStatus s) => s switch {
+        LandIt.Models.RecruiterStatus.Approved => "success",
+        LandIt.Models.RecruiterStatus.Pending => "warning",
+        LandIt.Models.RecruiterStatus.Rejected => "danger",
+        _ => "neutral"
+    };
+}
+
+<div class="page-head">
+    <div>
+        <a asp-action="Index" class="btn sm ghost" style="margin-bottom:8px;"><i class="ti ti-arrow-left"></i> All recruiters</a>
+        <h1>@Model.FullName</h1>
+        <div class="sub">@Model.Title at @Model.Company</div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:18px;">
+    <div class="card-x">
+        <div style="display:flex; align-items:center; gap:18px; margin-bottom:18px;">
+            <div class="avatar xl">@Initials(Model.FullName)</div>
+            <div style="flex:1;">
+                <h2 style="margin:0;">@Model.FullName</h2>
+                <div style="color:var(--muted); margin-top:3px; font-size:14px;">@(Model.User?.Email ?? "—")</div>
+                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="badge @Tone(Model.Status)">@Model.Status</span>
+                    <span class="badge neutral">@Model.Region</span>
+                    @if (avg > 0)
+                    {
+                        <span class="stars"><i class="ti ti-star-filled"></i> @avg.ToString("0.0") <span style="color:var(--muted); font-weight:400;">(@Model.Reviews.Count reviews)</span></span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding-top:14px; border-top:1px solid var(--border);">
+            <div><div class="eyebrow" style="margin-bottom:4px;">Hourly rate</div><div style="font-weight:600;">$@Model.HourlyRate</div></div>
+            <div><div class="eyebrow" style="margin-bottom:4px;">Bookings</div><div style="font-weight:600;">@(Model.Bookings?.Count ?? 0)</div></div>
+            <div><div class="eyebrow" style="margin-bottom:4px;">Joined</div><div style="font-weight:600;">@Model.CreatedAt?.ToString("yyyy-MM-dd")</div></div>
+        </div>
+
+        <div style="margin-top:18px;">
+            <div class="eyebrow" style="margin-bottom:6px;">Skills</div>
+            <p style="color:var(--muted2); margin:0; line-height:1.6;">@Model.Skills</p>
+        </div>
+    </div>
+
+    <div class="card-x">
+        <h3>Change status</h3>
+        <form asp-action="ChangeStatus" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <select name="status" class="input-x" style="width:100%; margin-bottom:10px;">
+                @foreach (var s in Enum.GetNames<LandIt.Models.RecruiterStatus>())
+                {
+                    <option value="@s" selected="@(Model.Status.ToString() == s)">@s</option>
+                }
+            </select>
+            <button class="btn primary" type="submit" style="width:100%;"><i class="ti ti-check"></i> Update status</button>
+        </form>
+    </div>
+</div>
+
+<h2 class="section-title">Reviews</h2>
+
+
+<div class="card-x no-pad">
+    @if (Model.Reviews == null || !Model.Reviews.Any())
+    {
+        <div class="empty-state">
+            <i class="ti ti-message-off"></i>
+            <div class="msg">No reviews yet.</div>
+        </div>
+    }
+    else
+    {
+        <table class="tbl">
+            <thead>
+                <tr>
+                    <th>Reviewer</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="right-align">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var rv in Model.Reviews.OrderByDescending(x => x.CreatedAt))
+                {
+                    <tr>
+                        <td>
+                            <div class="person">
+                                <div class="avatar sm">@Initials(rv.User?.FullName)</div>
+                                <div class="meta">
+                                    <div class="name">@(rv.User?.FullName ?? rv.UserId)</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="stars">
+                                <i class="ti ti-star-filled"></i> @rv.Rating
+                            </span>
+                        </td>
+
+                        <td style="color:var(--muted2);">
+                            @rv.Comment
+                        </td>
+
+                        <td class="muted-cell">
+                            @rv.CreatedAt.ToString("yyyy-MM-dd")
+                        </td>
+
+                        <!-- STATUS BADGE -->
+                        <td>
+                            @if (rv.IsApproved)
+                            {
+                                <span class="badge success">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="badge warning">Pending</span>
+                            }
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td>
+                            <div class="actions-row">
+
+                                @if (!rv.IsApproved)
+                                {
+                                    <form asp-action="ApproveReview"
+                                          asp-route-id="@rv.Id"
+                                          asp-route-recruiterId="@Model.Id"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <button class="btn sm success">
+                                            <i class="ti ti-check"></i> Approve
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="RejectReview"
+                                          asp-route-id="@rv.Id"
+                                          asp-route-recruiterId="@Model.Id"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <button class="btn sm warning-soft">
+                                            <i class="ti ti-x"></i> Reject
+                                        </button>
+                                    </form>
+                                }
+
+                                <form asp-action="DeleteReview"
+                                      asp-route-id="@rv.Id"
+                                      asp-route-recruiterId="@Model.Id"
+                                      method="post"
+                                      onsubmit="return confirm('Delete review?');">
+                                    @Html.AntiForgeryToken()
+
+                                    <button class="btn sm danger-soft">
+                                        <i class="ti ti-trash"></i> Delete
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

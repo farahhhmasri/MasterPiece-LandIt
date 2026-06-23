@@ -1,0 +1,95 @@
+﻿@model List<LandIt.Models.QuestionRequest>
+@{
+    ViewData["Title"] = "Question History";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" style="max-width:760px;">
+
+    <!--Header-->
+    <div style="margin-bottom:2rem;">
+        <a href="@Url.Action("Index", "Questions")"
+           style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Generate new questions
+        </a>
+        <div class="sec-eyebrow">History</div>
+        <h1 class="sec-title" style="margin-bottom:0.25rem;">Past Question Sets</h1>
+        <p class="step-desc">All your previously generated interview question sets.</p>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Empty state -->
+        <div class="app-card" style="text-align:center;padding:3rem 2rem;">
+            <i class="ti ti-bulb" aria-hidden="true"
+               style="font-size:2.5rem;color:var(--muted);display:block;margin-bottom:1rem;"></i>
+            <p style="font-size:0.95rem;font-weight:500;color:var(--text);margin-bottom:0.4rem;">
+                No question sets yet
+            </p>
+            <p style="font-size:0.85rem;color:var(--muted2);margin-bottom:1.5rem;">
+                Generate your first set of interview questions to see them here.
+            </p>
+            <a href="@Url.Action("Index", "Questions")"
+               class="btn-primary"
+               style="display:inline-flex;align-items:center;gap:6px;padding:0.6rem 1.5rem;text-decoration:none;">
+                <i class="ti ti-bulb" aria-hidden="true"></i> Generate questions
+            </a>
+        </div>
+    }
+    else
+    {
+        <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            @foreach (var request in Model)
+            {
+                <div class="app-card"
+                     style="display:flex;align-items:center;gap:14px;">
+
+                    <!-- Icon -->
+                    <div style="width:42px;height:42px;border-radius:10px;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">
+                        <i class="ti ti-bulb" aria-hidden="true"></i>
+                    </div>
+
+                    <!-- Info -->
+                    <div style="flex:1;min-width:0;">
+                        <p style="font-size:0.9rem;font-weight:600;color:var(--text);margin:0 0 3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                            @request.JobTitle
+                        </p>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            @if (!string.IsNullOrWhiteSpace(request.level))
+                            {
+                                <span style="font-size:0.72rem;font-weight:500;padding:2px 8px;border-radius:100px;background:var(--blue-dim);color:var(--blue);">
+                                    @request.level
+                                </span>
+                            }
+                            <span style="font-size:0.78rem;color:var(--muted2);">
+                                @(request.GeneratedQuestions?.Count ?? 0) questions
+                            </span>
+                            <span style="font-size:0.78rem;color:var(--muted);">
+                                @request.CreatedAt?.ToString("MMM dd, yyyy")
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- View button -->
+                    <a href="@Url.Action("View", "Questions", new { id = request.Id })"
+                       class="btn-ghost"
+                       style="display:inline-flex;align-items:center;gap:5px;padding:0.45rem 0.9rem;text-decoration:none;white-space:nowrap;font-size:0.82rem;">
+                        <i class="ti ti-eye" aria-hidden="true"></i> View
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Bottom action -->
+        <div style="margin-top:1.5rem;">
+            <a href="@Url.Action("Index", "Questions")"
+               class="btn-primary"
+               style="display:inline-flex;align-items:center;gap:6px;padding:0.65rem 1.5rem;text-decoration:none;">
+                <i class="ti ti-plus" aria-hidden="true"></i> Generate new questions
+            </a>
+        </div>
+    }
+
+</div>

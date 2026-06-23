@@ -1,0 +1,142 @@
+﻿@model LandIt.Models.AppUser
+
+@{
+    ViewData["Title"] = "My Questions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="app-container">
+
+    <a href="/Account/DashboardRouter"
+       style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.25rem;">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Dashboard
+    </a>
+    <div class="app-card" style="margin-bottom: 2.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+
+            <div>
+                <div class="sec-title" style="font-size:1.2rem;margin-bottom:0.25rem;">
+                    My Interview Questions
+                </div>
+                <div class="step-desc">
+                    All AI-generated interview question sets
+                </div>
+            </div>
+
+            <a class="btn-primary"
+               asp-controller="Questions"
+               asp-action="Index">
+                + Generate New
+            </a>
+
+        </div>
+    </div>
+
+
+    <!-- CONTENT -->
+    @if (Model.QuestionRequests != null && Model.QuestionRequests.Any())
+    {
+        foreach (var q in Model.QuestionRequests)
+        {
+            <div class="app-card mb-3">
+
+                <!-- TOP INFO -->
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+
+                        <span class="feat-tag">
+                            📌 @q.JobTitle
+                        </span>
+
+                        @if (!string.IsNullOrEmpty(q.level))
+                        {
+                            <span class="feat-tag">
+                                🎯 @q.level
+                            </span>
+                        }
+
+                    </div>
+
+                    <small style="color:var(--muted);">
+                        @q.CreatedAt?.ToString("dd MMM yyyy")
+                    </small>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+                @if (!string.IsNullOrWhiteSpace(q.JobDescription))
+                {
+                    <div style="margin-bottom:1rem;">
+                        <div class="feat-title" style="font-size:0.9rem;">
+                            Job Title
+                        </div>
+                        <div class="feat-desc">
+                            @q.JobTitle
+                        </div>
+                    </div>
+                }
+
+
+                <!-- QUESTIONS -->
+                <div>
+
+                    <div class="feat-title" style="font-size:0.95rem;margin-bottom:0.75rem;">
+                        Generated Questions (@q.GeneratedQuestions?.Count() ?? 0)
+                    </div>
+
+                    @if (q.GeneratedQuestions != null && q.GeneratedQuestions.Any())
+                    {
+                        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+
+                            @foreach (var question in q.GeneratedQuestions)
+                            {
+                                <div class="feat-card" style="padding:1rem;background:var(--surface2);">
+
+                                    <div class="feat-desc" style="font-weight:400;">
+                                        @question.QuestionText
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(question.Category))
+                                    {
+                                        <div style="margin-top:0.5rem;">
+                                            <span class="feat-tag">
+                                                @question.Category
+                                            </span>
+                                        </div>
+                                    }
+
+                                </div>
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="step-desc">
+                            No questions generated for this request yet.
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="app-card" style="text-align:center;padding:2rem;">
+            <div class="feat-title">No Questions Yet</div>
+
+            <p class="step-desc">
+                You haven’t generated any interview questions yet.
+            </p>
+
+        </div>
+    }
+
+</div>

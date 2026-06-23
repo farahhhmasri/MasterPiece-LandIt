@@ -1,0 +1,108 @@
+@page
+@using LandIt.Models;
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    ViewData["HideAds"] = true;
+    ViewData["UseBootstrap"] = true;
+}
+
+<div style="min-height: calc(100vh - 120px); display: flex; align-items: center; padding: 3rem 1rem;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-5">
+
+                <form id="registerForm"
+                      asp-route-returnUrl="@Model.ReturnUrl"
+                      method="post"
+                      enctype="multipart/form-data"
+                      style="background: var(--surface); border: 0.5px solid var(--border); border-radius: 20px; padding: 2.5rem;">
+
+                    <h2 style="font-family:'Sora',sans-serif; font-size:1.4rem; font-weight:700; text-align:center; color:var(--text); margin-bottom:0.5rem;">
+                        Create a new account
+                    </h2>
+                    <p style="text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:2rem;">
+                        Join LandIt and start landing your next job
+                    </p>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small" role="alert"></div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.FullName"
+                               class="app-input"
+                               placeholder="Full Name" />
+                        <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.Email"
+                               class="app-input"
+                               placeholder="Email"
+                               autocomplete="username" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.Password"
+                               class="app-input"
+                               placeholder="Password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.ConfirmPassword"
+                               class="app-input"
+                               placeholder="Confirm Password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <select asp-for="Input.Region"
+                                asp-items="Html.GetEnumSelectList<Region>()"
+                                class="app-input">
+                            <option value="">Select your region</option>
+                        </select>
+                        <span asp-validation-for="Input.Region" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1.75rem;">
+                        <label style="font-size:0.8rem;color:var(--muted);margin-bottom:0.4rem;display:block;">
+                            Profile Photo
+                            <span style="font-weight:400;"> — optional · JPG or PNG, max 5MB</span>
+                        </label>
+                        <input asp-for="Input.Photo"
+                               type="file"
+                               class="app-input"
+                               accept=".jpg,.jpeg,.png"
+                               style="padding: 0.5rem 1rem; cursor:pointer;" />
+                        <span asp-validation-for="Input.Photo" class="text-danger small"></span>
+                    </div>
+
+                    <button id="registerSubmit"
+                            type="submit"
+                            class="btn-primary"
+                            style="width:100%; justify-content:center; padding:0.75rem; font-size:0.95rem;text-align:center;">
+                        Register
+                    </button>
+
+                </form>
+
+                <div style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:var(--muted);">
+                    Already have an account?
+                    <a asp-area="Identity"
+                       asp-page="/Account/Login"
+                       style="color:var(--blue); font-weight:500; text-decoration:none;">
+                        Login
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

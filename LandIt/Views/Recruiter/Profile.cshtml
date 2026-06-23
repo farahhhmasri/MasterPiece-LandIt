@@ -1,0 +1,213 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "My Profile";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    ViewData["HideAds"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .app-container {
+        max-width: 1140px;
+    }
+</style>
+
+<div class="app-container">
+
+    <div class="row g-4">
+
+        <!-- Left column -->
+        <div class="col-lg-4 col-md-5">
+
+            <!-- Identity Card -->
+            <div class="app-card text-center">
+
+                <!-- Avatar -->
+                <div style="width:90px;height:90px;border-radius:50%;background:var(--blue-dim);color:var(--blue);font-size:2rem;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                    @(((string)Model.FullName)?.Substring(0, 1).ToUpper())
+                </div>
+
+                <p style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:4px;">@Model.FullName</p>
+                <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:4px;">@Model.Title</p>
+                <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:12px;">@Model.Company</p>
+
+                <!-- Status Badge -->
+                @{
+                    string statusBg = Model.Status?.ToString() == "Approved" ? "rgba(34,197,94,0.1)" : "rgba(251,191,36,0.1)";
+                    string statusColor = Model.Status?.ToString() == "Approved" ? "#16a34a" : "#d97706";
+                }
+                <span style="display:inline-block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;background:@statusBg;color:@statusColor;padding:0.25rem 0.75rem;border-radius:100px;border:0.5px solid @statusColor;margin-bottom:1.25rem;">
+                    @Model.Status
+                </span>
+
+                <hr style="border-color:var(--border);" />
+
+                <div class="d-flex flex-column gap-2">
+                    <a href="/Recruiter/EditProfile"
+                       class="btn-ghost"
+                       style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;text-decoration:none;">
+                        <i class="ti ti-edit" aria-hidden="true"></i> Edit Profile
+                    </a>
+
+                    @if (ViewBag.CanAddTestimonial == true)
+                    {
+                        <a href="/Testimonial/Create"
+                           class="btn-ghost"
+                           style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;">
+                            <i class="ti ti-message-star" aria-hidden="true"></i> Add Testimonial
+                        </a>
+                    }
+
+                    <a href="/Recruiter/Dashboard"
+                       class="btn-ghost"
+                       style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;text-decoration:none;">
+                        <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+                    </a>
+                </div>
+
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="margin:0;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;">
+                        <i class="ti ti-logout" aria-hidden="true"></i> Logout
+                    </button>
+                </form>
+
+            </div>
+
+            <!-- Details Card -->
+            <div class="app-card mt-3">
+                <p style="font-size:0.7rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Details</p>
+                <div style="display:flex;flex-direction:column;gap:0.85rem;">
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="ti ti-map-pin" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                        <div>
+                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">Region</p>
+                            <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">@Model.Region</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="ti ti-currency-dollar" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                        <div>
+                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">Hourly Rate</p>
+                            <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">$@Model.HourlyRate / hour</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="ti ti-building" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                        <div>
+                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">Company</p>
+                            <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">@Model.Company</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="ti ti-brand-linkedin" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                        <div>
+                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">LinkedIn Profile</p>
+                            <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">@Model.linkedInURL</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div> <!-- END left column -->
+        <!-- Right Column -->
+        <div class="col-lg-8 col-md-7">
+
+            <!-- Stats Row -->
+            <div class="row g-3 mb-3">
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-calendar-event" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">@(Model.AvailabilityCount ?? 0)</p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Availability Slots</p>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-message-star" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">@(Model.ReviewsCount ?? 0)</p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Reviews</p>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-star" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">@Model.AverageRating.ToString("0.0")</p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Avg Rating</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Card -->
+            <div class="app-card mb-3">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="font-size:0.9rem;font-weight:500;color:var(--text);margin:0;">Skills</p>
+                    <a href="/Recruiter/EditProfile" style="font-size:0.78rem;color:var(--blue);text-decoration:none;">Edit</a>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace((string)Model.Skills))
+                {
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        @foreach (var skill in ((string)Model.Skills).Split(','))
+                        {
+                            <span style="font-size:0.78rem;font-weight:500;padding:4px 10px;border-radius:100px;background:var(--blue-dim);color:var(--blue);border:0.5px solid rgba(79,142,247,0.3);">
+                                @skill.Trim()
+                            </span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p style="font-size:0.85rem;color:var(--muted);margin:0;">
+                        No skills added yet.
+                        <a href="/Recruiter/EditProfile" style="color:var(--blue);">Add your skills</a>
+                    </p>
+                }
+            </div>
+
+            <!-- Quick links card -->
+            <div class="app-card">
+                <p style="font-size:0.9rem;font-weight:500;color:var(--text);margin:0 0 1rem;">Quick Actions</p>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;">
+
+                    <a href="/Recruiter/Availability"
+                       style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--surface2);border-radius:10px;text-decoration:none;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <i class="ti ti-calendar-plus" aria-hidden="true" style="color:var(--blue);font-size:1rem;"></i>
+                            <span style="font-size:0.875rem;font-weight:500;color:var(--text);">Manage Availability</span>
+                        </div>
+                        <i class="ti ti-chevron-right" aria-hidden="true" style="color:var(--muted);"></i>
+                    </a>
+
+                    <a href="/Recruiter/Bookings"
+                       style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--surface2);border-radius:10px;text-decoration:none;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <i class="ti ti-calendar-event" aria-hidden="true" style="color:var(--blue);font-size:1rem;"></i>
+                            <span style="font-size:0.875rem;font-weight:500;color:var(--text);">View Bookings</span>
+                        </div>
+                        <i class="ti ti-chevron-right" aria-hidden="true" style="color:var(--muted);"></i>
+                    </a>
+
+                    <a href="/Recruiter/Reviews"
+                       style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--surface2);border-radius:10px;text-decoration:none;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <i class="ti ti-star" aria-hidden="true" style="color:var(--blue);font-size:1rem;"></i>
+                            <span style="font-size:0.875rem;font-weight:500;color:var(--text);">My Reviews</span>
+                        </div>
+                        <i class="ti ti-chevron-right" aria-hidden="true" style="color:var(--muted);"></i>
+                    </a>
+
+                </div>
+            </div>
+
+        </div> <!-- END right column -->
+
+    </div> <!-- END row -->
+
+</div> <!-- END app-container -->

@@ -1,0 +1,136 @@
+﻿@model LandIt.Models.ViewModels.TestimonialViewModel
+@{
+    ViewData["Title"] = "Add Testimonial";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" style="max-width:620px;">
+
+    <!--Back link-->
+    <a href="/Account/ProfileRouter" style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.5rem;" >
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Profile
+    </a>
+
+
+
+            <!--Header-->
+            <div class="sec-eyebrow">Share your experience</div>
+            <h1 class="sec-title" style="margin-bottom:0.5rem;">Add a Testimonial</h1>
+            <p class="step-desc" style="margin-bottom:2rem;">
+                Your feedback helps other job seekers discover LandIt.
+                Testimonials are reviewed before appearing on the site.
+            </p>
+
+                <!--Error-->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#ef4444;">
+                        <div asp-validation-summary="ModelOnly"></div>
+                    </div>
+                }
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="app-card" style="margin-bottom:1.25rem;">
+
+            <!--Which feature-->
+                            <div class="mb-3">
+                                <label asp-for="Source" class="app-label">Which feature are you reviewing?</label>
+                                <select asp-for="Source"
+                                        asp-items="Html.GetEnumSelectList<LandIt.Models.TestimonialSource>()"
+                                        class="app-input"></select>
+                                <span asp-validation-for="Source" style="font-size:0.78rem;color:#ef4444;"></span>
+                            </div>
+
+            <!--Star rating-->
+                                <div class="mb-3">
+                                    <label class="app-label">Rating</label>
+                                    <div style="display:flex;gap:8px;margin-top:4px;" id="starContainer">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <button type="button"
+                                                    class="star-btn"
+                                                    data-value="@i"
+                                                    style="background:none;border:none;cursor:pointer;font-size:1.75rem;color:var(--muted);padding:0;transition:color 0.15s;"
+                                                    aria-label="@i star@(i > 1 ? "s" : "")">
+                                                ★
+                                            </button>
+                                        }
+                                    </div>
+                                    <input asp-for="Rating" type="hidden" id="ratingInput" />
+                                    <span asp-validation-for="Rating" style="font-size:0.78rem;color:#ef4444;"></span>
+                                </div>
+
+                                    <!--Content-->
+                                    <div class="mb-3">
+                                        <label asp-for="Content" class="app-label">Your testimonial</label>
+                                        <textarea asp-for="Content"
+                                                  class="app-input"
+                                                  rows="6"
+                                                  placeholder="Tell us how LandIt helped you in your job search. What did you find most valuable?"
+                                                  style="resize:vertical;"></textarea>
+                                        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                                            Max 2000 characters. Be specific — what changed after using LandIt?
+                                        </div>
+                                        <span asp-validation-for="Content" style="font-size:0.78rem;color:#ef4444;"></span>
+                                    </div>
+
+                                        <!--Info note-->
+                                        <div style="display:flex;align-items:flex-start;gap:8px;padding:0.75rem 1rem;background:var(--blue-dim);border-radius:10px;border:0.5px solid rgba(79,142,247,0.25);">
+                                            <i class="ti ti-info-circle" aria-hidden="true" style="color:var(--blue);font-size:1rem;flex-shrink:0;margin-top:2px;"></i>
+                                            <p style="font-size:0.82rem;color:var(--muted2);margin:0;line-height:1.6;">
+                                                Your name will be shown with the testimonial. It will only appear on the site after
+                                                our team has reviewed and approved it.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!--Submit-->
+                                        <button type="submit"
+                                                class="btn-primary"
+                                                style="width:100%;padding:0.85rem;font-size:0.95rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                                            <i class="ti ti-send" aria-hidden="true"></i>
+                                            Submit Testimonial
+                                        </button>
+                                    </form>
+                                </div>
+
+                                @section Scripts {
+                                    @{
+                                        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                                    }
+                                    <script>
+                                        // Star rating interaction
+                                        var stars     = document.querySelectorAll('.star-btn');
+                                        var ratingInput = document.getElementById('ratingInput');
+                                        var current   = parseInt(ratingInput.value) || 5;
+
+                                        function updateStars(val) {
+                                            stars.forEach(function (s) {
+                                                s.style.color = parseInt(s.dataset.value) <= val ? '#f59e0b' : 'var(--muted)';
+                                            });
+                                        }
+
+                                        // Set initial state
+                                        updateStars(current);
+
+                                        stars.forEach(function (star) {
+                                            star.addEventListener('click', function () {
+                                                current = parseInt(this.dataset.value);
+                                                ratingInput.value = current;
+                                                updateStars(current);
+                                            });
+
+                                            star.addEventListener('mouseenter', function () {
+                                                updateStars(parseInt(this.dataset.value));
+                                            });
+
+                                            star.addEventListener('mouseleave', function () {
+                                                updateStars(current);
+                                            });
+                                        });
+                                    </script>
+                                }

@@ -1,0 +1,95 @@
+@model IEnumerable<LandIt.Models.Booking>
+
+@if (Model != null && Model.Any())
+{
+    var count = Model.Count();
+
+    <div id="recruiterPendingBanner" style="position:sticky;top:0;z-index:99;background:linear-gradient(90deg, rgba(217,119,6,0.15), rgba(217,119,6,0.05));border-bottom:1px solid rgba(217,119,6,0.25);padding:14px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="width:38px;height:38px;border-radius:10px;background:#d97706;color:#fff;display:grid;place-items:center;flex-shrink:0;">
+            <i class="ti ti-bell-ringing" style="font-size:20px;"></i>
+        </div>
+        <div style="flex:1;min-width:240px;">
+            <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:15px;color:var(--text);letter-spacing:-0.01em;">
+                Bookings waiting for your approval
+            </div>
+            <div style="font-size:13px;color:var(--muted2);margin-top:2px;">
+                <strong>@count</strong> candidate@(count == 1 ? " is" : "s are") waiting for you to confirm their session.
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button type="button" onclick="document.getElementById('recruiterPendingModal').style.display='flex'"
+                    style="background:#d97706;color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;font-size:14px;cursor:pointer;">
+                Review now
+            </button>
+            <button type="button" onclick="this.closest('#recruiterPendingBanner').style.display='none'"
+                    style="background:transparent;border:0;color:var(--muted2);cursor:pointer;padding:6px;border-radius:8px;" title="Dismiss">
+                <i class="ti ti-x" style="font-size:18px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="recruiterPendingModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(13,15,18,0.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;"
+         onclick="if(event.target===this) this.style.display='none'">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,0.25);max-width:580px;width:100%;max-height:85vh;overflow:auto;">
+            <div style="padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--text);">
+                        Pending bookings
+                    </div>
+                    <div style="font-size:13px;color:var(--muted);margin-top:3px;">
+                        Approve or decline each candidate's request.
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('recruiterPendingModal').style.display='none'"
+                        style="background:transparent;border:0;color:var(--muted);cursor:pointer;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;" title="Close">
+                    <i class="ti ti-x" style="font-size:20px;"></i>
+                </button>
+            </div>
+
+            <div style="padding:18px 24px;">
+                @foreach (var b in Model)
+                {
+                    var initials = string.IsNullOrWhiteSpace(b.User?.FullName) ? "?" : string.Concat(b.User!.FullName.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:14px;margin-bottom:10px;background:var(--surface2);">
+                        <div style="width:44px;height:44px;border-radius:999px;background:var(--blue-dim);color:var(--blue);display:grid;place-items:center;flex-shrink:0;font-weight:600;font-size:14px;">
+                            @initials
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:600;font-size:14.5px;color:var(--text);">
+                                @b.User?.FullName
+                            </div>
+                            <div style="font-size:12.5px;color:var(--muted);">
+                                @(b.TimeSlot != null ? b.TimeSlot.StartTime.ToString("ddd, MMM d · h:mm tt") : "—")
+                                @if (!string.IsNullOrEmpty(b.JobTitle))
+                                {
+                                    <span> · @b.JobTitle</span>
+                                }
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <form asp-controller="Recruiter" asp-action="ApproveBooking" asp-route-id="@b.Id" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background:#16a34a;color:#fff;border:0;border-radius:8px;padding:7px 12px;font-weight:600;font-size:12.5px;cursor:pointer;">
+                                    Approve
+                                </button>
+                            </form>
+                            <form asp-controller="Recruiter" asp-action="RejectBooking" asp-route-id="@b.Id" method="post" style="display:inline;" onsubmit="return confirm('Reject this booking?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background:rgba(220,38,38,0.10);color:#dc2626;border:0;border-radius:8px;padding:7px 12px;font-weight:600;font-size:12.5px;cursor:pointer;">
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div style="padding:14px 24px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;">
+                <a asp-controller="Recruiter" asp-action="Bookings" style="color:var(--blue);font-weight:600;font-size:13.5px;text-decoration:none;">
+                    Open bookings page →
+                </a>
+            </div>
+        </div>
+    </div>
+}

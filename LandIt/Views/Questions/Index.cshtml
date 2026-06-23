@@ -1,0 +1,134 @@
+﻿@model LandIt.Models.ViewModels.QuestionRequestViewModel
+@{
+    ViewData["Title"] = "Interview Question Generator";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" style="max-width:720px;">
+
+        <!--Header-->
+        <div style="margin-bottom:2rem;">
+        <a href="/Account/DashboardRouter"
+               style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+                <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Dashboard
+            </a>
+            <div class="sec-eyebrow">AI-Powered</div>
+            <h1 class="sec-title" style="margin-bottom:0.5rem;">Interview Question Generator</h1>
+            <p class="step-desc">
+                Tell us about the role you are applying for and our AI will generate
+                the most likely interview questions with tips on how to answer them.
+            </p>
+        </div>
+
+        <!-- Error summary -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#ef4444;">
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            }
+
+            <form asp-action="Generate" method="post" id="questionForm">
+                @Html.AntiForgeryToken()
+
+                <!-- Step 1: Job details -->
+                    <div class="app-card" style="margin-bottom:1.25rem;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+                            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+                            <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Job details</p>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="JobTitle" class="app-label">Job title</label>
+                                <input asp-for="JobTitle"
+                                       class="app-input"
+                                       placeholder="e.g. Senior Backend Engineer" />
+                                <span asp-validation-for="JobTitle" style="font-size:0.78rem;color:#ef4444;"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="CompanyName" class="app-label">
+                                    Company <span style="font-weight:300;color:var(--muted);">(optional)</span>
+                                </label>
+                                <input asp-for="CompanyName"
+                                       class="app-input"
+                                       placeholder="e.g. Google" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label asp-for="Level" class="app-label">Experience level</label>
+                            <select asp-for="Level" class="app-input">
+                                <option value="entry">Entry level (0–2 years)</option>
+                                <option value="mid" selected>Mid level (2–5 years)</option>
+                                <option value="senior">Senior level (5–10 years)</option>
+                                <option value="lead">Lead / Principal (10+ years)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Job description -->
+                        <div class="app-card" style="margin-bottom:1.25rem;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+                                <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+                                <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Job description</p>
+                            </div>
+
+                            <label asp-for="JobDescription" class="app-label">
+                                Paste the job description or key requirements
+                            </label>
+                            <textarea asp-for="JobDescription"
+                                      class="app-input"
+                                      rows="9"
+                                      placeholder="Paste the full job posting here. The more detail you provide, the more targeted the questions will be."
+                                      style="resize:vertical;"></textarea>
+                            <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                                Include required skills, responsibilities, and any specific technologies mentioned.
+                            </div>
+                            <span asp-validation-for="JobDescription" style="font-size:0.78rem;color:#ef4444;"></span>
+                        </div>
+
+                        <!-- Submit -->
+                            <button type="submit"
+                                    class="btn-primary"
+                                    id="submitBtn"
+                                    style="width:100%;padding:0.85rem;font-size:0.95rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                                <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></span>
+                                <i class="ti ti-bulb" id="btnIcon" aria-hidden="true"></i>
+                                <span id="btnText">Generate Interview Questions</span>
+                            </button>
+
+                            <p style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:0.75rem;">
+                                Generates 15 targeted questions. Usually takes 5–10 seconds.
+                            </p>
+                        </form>
+
+                        <!-- History link -->
+                            <div style="text-align:center;margin-top:1.5rem;">
+                                <a href="@Url.Action("History", "Questions")"
+                                   style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;">
+                                    <i class="ti ti-history" aria-hidden="true"></i> View past question sets
+                                </a>
+                            </div>
+
+                        </div>
+
+                        @section Scripts {
+                            @{
+                                await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                            }
+                            <script>
+                                document.getElementById('questionForm').addEventListener('submit', function () {
+                                    var btn     = document.getElementById('submitBtn');
+                                    var spinner = document.getElementById('spinner');
+                                    var icon    = document.getElementById('btnIcon');
+                                    var text    = document.getElementById('btnText');
+                                    btn.disabled = true;
+                                    spinner.classList.remove('d-none');
+                                    icon.classList.add('d-none');
+                                    text.textContent = 'Generating questions…';
+                                });
+                            </script>
+                        }

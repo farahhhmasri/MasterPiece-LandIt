@@ -1,0 +1,78 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<LandIt.Models.AppUser> UserManager
+@{
+    Layout = null;
+    var ctrl = (ViewContext.RouteData.Values["controller"] ?? "").ToString();
+    var currentUser = await UserManager.GetUserAsync(User);
+    var initials = (currentUser?.FullName ?? "AD").Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0]).Aggregate("", (a, c) => a + c).ToUpper();
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — LandIt Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
+    <link rel="stylesheet" href="~/css/landit.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <div class="logo">Land<span>It</span></div>
+                <span class="badge-admin-pill">ADMIN</span>
+            </div>
+
+            <nav class="admin-nav">
+                <a class="@(ctrl == "Admin" ? "active" : "")" asp-area="Admin" asp-controller="Admin" asp-action="Index"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+                <a class="@(ctrl == "Users" ? "active" : "")" asp-area="Admin" asp-controller="Users" asp-action="Index"><i class="ti ti-users"></i>Users</a>
+                <a class="@(ctrl == "Recruiters" ? "active" : "")" asp-area="Admin" asp-controller="Recruiters" asp-action="Index"><i class="ti ti-briefcase"></i>Recruiters</a>
+                <a class="@(ctrl == "Bookings" ? "active" : "")" asp-area="Admin" asp-controller="Bookings" asp-action="Index"><i class="ti ti-calendar"></i>Bookings</a>
+                <a class="@(ctrl == "Testimonials" ? "active" : "")" asp-area="Admin" asp-controller="Testimonials" asp-action="Index"><i class="ti ti-message-star"></i>Testimonials</a>
+                <a class="@(ctrl == "ContactMessages" ? "active" : "")" asp-area="Admin" asp-controller="ContactMessages" asp-action="Index"><i class="ti ti-inbox"></i>Messages</a>
+            </nav>
+
+            <div class="sidebar-foot">
+                <button class="theme-btn" type="button" id="themeToggle"><i class="ti ti-moon" id="themeIcon"></i><span id="themeLabel">theme mode</span></button>
+                <a class="profile-card" asp-area="Admin" asp-controller="Admin" asp-action="Profile">
+                    <div class="avatar md">@initials</div>
+                    <div>
+                        <div class="name">@currentUser?.FullName</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </a>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                    <button type="submit" class="logout-btn"><i class="ti ti-logout"></i>Sign out</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert-x success"><i class="ti ti-circle-check"></i> @TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert-x error"><i class="ti ti-alert-circle"></i> @TempData["Error"]</div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        (function() {
+        try {
+        var t = localStorage.getItem('landit-theme') || 'light'; // default is light
+        document.documentElement.setAttribute('data-theme', t);
+        } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        }
+        })();
+    </script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

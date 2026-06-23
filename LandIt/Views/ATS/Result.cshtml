@@ -1,0 +1,238 @@
+﻿@model LandIt.Models.ViewModels.ATSResultViewModel
+
+@{
+    ViewData["Title"] = "ATS Analysis Result";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Score color logic
+    var scoreColor  = Model.Score >= 75 ? "#16a34a" : Model.Score >= 50 ? "#d97706" : "#dc2626";
+    var scoreBg     = Model.Score >= 75 ? "rgba(34,197,94,0.1)"  : Model.Score >= 50 ? "rgba(251,191,36,0.1)"  : "rgba(239,68,68,0.1)";
+    var scoreBorder = Model.Score >= 75 ? "rgba(34,197,94,0.25)" : Model.Score >= 50 ? "rgba(251,191,36,0.25)" : "rgba(239,68,68,0.25)";
+    var scoreLabel  = Model.Score >= 75 ? "Strong match — ready to apply." : Model.Score >= 50 ? "Good match — a few improvements will help." : "Fair match — consider optimising before applying.";
+    var scoreIcon   = Model.Score >= 75 ? "ti-circle-check" : Model.Score >= 50 ? "ti-alert-circle" : "ti-circle-x";
+}
+
+<div class="container py-5" style="max-width:760px;">
+
+    <!--Back link-->
+    <a href="/Account/MyResumes"
+       style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.5rem;">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to My Resumes
+    </a>
+
+    <!-- Page header -->
+    <div class="sec-eyebrow">Analysis complete</div>
+    <h1 class="sec-title" style="margin-bottom:0.25rem;">ATS Result — @Model.JobTitle</h1>
+    <p class="step-desc" style="margin-bottom:2rem;">
+        Here's how your resume performs against the job description.
+    </p>
+
+    <!-- Success / error flash -->
+    @if (TempData["Success"] != null)
+    {
+        <div style="background:rgba(34,197,94,0.1);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#16a34a;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-circle-check" aria-hidden="true"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#dc2626;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i> @TempData["Error"]
+        </div>
+    }
+
+    <!-- ATS Score card -->
+    <div class="app-card" style="margin-bottom:1.25rem;background:@scoreBg;border-color:@scoreBorder;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.4rem;">
+                    <i class="ti @scoreIcon" aria-hidden="true" style="font-size:1.1rem;color:@scoreColor;"></i>
+                    <span style="font-size:0.95rem;font-weight:600;color:@scoreColor;">ATS Match Score</span>
+                </div>
+                <p style="font-size:0.875rem;color:var(--muted2);margin:0;">@scoreLabel</p>
+            </div>
+            <div style="font-family:'Sora',sans-serif;font-size:3rem;font-weight:700;color:@scoreColor;line-height:1;min-width:100px;text-align:right;">
+                @Model.Score<span style="font-size:1.1rem;">%</span>
+            </div>
+        </div>
+
+        <!-- Score bar -->
+        <div style="margin-top:1rem;height:6px;background:rgba(0,0,0,0.08);border-radius:100px;overflow:hidden;">
+            <div style="height:100%;width:@(Model.Score)%;background:@scoreColor;border-radius:100px;transition:width 1s ease;"></div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+
+        <!-- Matched keywords -->
+        <div class="col-md-6">
+            <div class="app-card" style="height:100%;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.85rem;">
+                    <i class="ti ti-circle-check" aria-hidden="true" style="color:#16a34a;font-size:1rem;"></i>
+                    <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">
+                        Matched Keywords
+                        <span style="font-size:0.75rem;font-weight:400;color:var(--muted);margin-left:4px;">(@Model.MatchedKeywords.Count)</span>
+                    </p>
+                </div>
+                @if (Model.MatchedKeywords.Any())
+                {
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        @foreach (var kw in Model.MatchedKeywords)
+                        {
+                            <span style="font-size:0.72rem;font-weight:500;padding:3px 8px;border-radius:100px;background:rgba(34,197,94,0.1);color:#16a34a;border:0.5px solid rgba(34,197,94,0.25);">
+                                @kw
+                            </span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p style="font-size:0.82rem;color:var(--muted);margin:0;">No keyword matches found.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Missing keywords -->
+        <div class="col-md-6">
+            <div class="app-card" style="height:100%;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.85rem;">
+                    <i class="ti ti-circle-x" aria-hidden="true" style="color:#dc2626;font-size:1rem;"></i>
+                    <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">
+                        Missing Keywords
+                        <span style="font-size:0.75rem;font-weight:400;color:var(--muted);margin-left:4px;">(@Model.MissingKeywords.Count)</span>
+                    </p>
+                </div>
+                @if (Model.MissingKeywords.Any())
+                {
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        @foreach (var kw in Model.MissingKeywords)
+                        {
+                            <span style="font-size:0.72rem;font-weight:500;padding:3px 8px;border-radius:100px;background:rgba(239,68,68,0.1);color:#dc2626;border:0.5px solid rgba(239,68,68,0.25);">
+                                @kw
+                            </span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p style="font-size:0.82rem;color:var(--muted);margin:0;">No missing keywords — great match!</p>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Suggestions -->
+    @if (Model.Suggestions.Any())
+    {
+        <div class="app-card" style="margin-bottom:1.25rem;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+                <i class="ti ti-bulb" aria-hidden="true" style="color:var(--blue);font-size:1rem;"></i>
+                <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">AI Suggestions</p>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+                @for (int i = 0; i < Model.Suggestions.Count; i++)
+                {
+                    <div style="display:flex;align-items:flex-start;gap:10px;padding:0.65rem 0.85rem;background:var(--surface2);border-radius:8px;">
+                        <span style="font-size:0.72rem;font-weight:600;color:var(--blue);background:var(--blue-dim);padding:2px 7px;border-radius:100px;flex-shrink:0;margin-top:1px;">
+                            @(i + 1)
+                        </span>
+                        <p style="font-size:0.875rem;color:var(--muted2);margin:0;line-height:1.6;">@Model.Suggestions[i]</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+
+
+    <!-- Generate Resume section -->
+    <div class="app-card" style="margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.5rem;">
+            <i class="ti ti-sparkles" aria-hidden="true" style="color:var(--blue);font-size:1rem;"></i>
+            <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">Generate ATS-Optimised Resume</p>
+        </div>
+        <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:1.25rem;">
+            Let AI rewrite your resume with stronger action verbs, better keyword placement,
+            and a clean single-column layout that ATS parsers love.
+        </p>
+
+        @if(Model.ResumeGenerated)
+        {
+            <!-- Already generated — show download -->
+            <div style="display:flex;align-items:center;gap:10px;padding:0.85rem 1rem;background:rgba(34,197,94,0.08);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;margin-bottom:1rem;">
+                <i class="ti ti-circle-check" aria-hidden="true" style="color:#16a34a;font-size:1.1rem;"></i>
+                <p style="font-size:0.875rem;color:#16a34a;margin:0;font-weight:500;">Your ATS resume is ready!</p>
+            </div>
+            <a href="@Url.Action("Download", "ATS", new { file = System.IO.Path.GetFileName(Model.GeneratedFileUrl) })"
+               class="btn-primary"
+               style="display:inline-flex;align-items:center;gap:8px;padding:0.7rem 1.5rem;text-decoration:none;">
+                <i class="ti ti-download" aria-hidden="true"></i> Download PDF
+            </a>
+        }
+        else
+        {
+            <!-- Not yet generated — show generate button -->
+            <form asp-action="GenerateResume" method="post" id="generateForm">
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn-primary"
+                        id="generateBtn"
+                        style="display:inline-flex;align-items:center;gap:8px;padding:0.7rem 1.5rem;">
+                    <span class="spinner-border spinner-border-sm d-none" id="genSpinner" role="status"></span>
+                    <i class="ti ti-sparkles" id="genIcon" aria-hidden="true"></i>
+                    <span id="genText">Generate ATS Resume</span>
+                </button>
+            </form>
+            <p style="font-size:0.75rem;color:var(--muted);margin-top:0.6rem;">
+                Takes 15–30 seconds to generate.
+            </p>
+        }
+    </div>
+
+    <!-- Bottom actions -->
+    <div style="display:flex;gap:0.85rem;flex-wrap:wrap;">
+        <a href="@Url.Action("Index", "ATS")"
+           class="btn-ghost"
+           style="display:inline-flex;align-items:center;gap:6px;padding:0.6rem 1.25rem;text-decoration:none;">
+            <i class="ti ti-refresh" aria-hidden="true"></i> Analyze another resume
+        </a>
+        <a href="/Account/MyResumes"
+           class="btn-ghost"
+           style="display:inline-flex;align-items:center;gap:6px;padding:0.6rem 1.25rem;text-decoration:none;">
+            <i class="ti ti-files" aria-hidden="true"></i> My Resumes
+        </a>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // Animate score bar on load
+        window.addEventListener('load', function () {
+            var bar = document.querySelector('[style*="transition:width"]');
+            if (bar) {
+                var target = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(function () { bar.style.width = target; }, 100);
+            }
+        });
+
+        // Loading state on generate
+        var generateForm = document.getElementById('generateForm');
+        if (generateForm) {
+            generateForm.addEventListener('submit', function () {
+                var btn     = document.getElementById('generateBtn');
+                var spinner = document.getElementById('genSpinner');
+                var icon    = document.getElementById('genIcon');
+                var text    = document.getElementById('genText');
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+                icon.classList.add('d-none');
+                text.textContent = 'Generating your resume…';
+            });
+        }
+    </script>
+}

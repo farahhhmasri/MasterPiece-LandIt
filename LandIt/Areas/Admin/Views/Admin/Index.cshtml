@@ -1,0 +1,144 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var recent = ViewBag.RecentBookings as IEnumerable<LandIt.Models.Booking>;
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+    string StatusTone(LandIt.Models.BookingStatus s) => s switch {
+        LandIt.Models.BookingStatus.Completed => "success",
+        LandIt.Models.BookingStatus.Confirmed => "success",
+        LandIt.Models.BookingStatus.Pending => "warning",
+        LandIt.Models.BookingStatus.Cancelled => "danger",
+        _ => "neutral"
+    };
+}
+
+<div class="page-head">
+    <div>
+        <h1>Dashboard</h1>
+        <div class="sub">Overview of platform activity and pending items.</div>
+    </div>
+    <div class="actions">
+        <a class="btn secondary" asp-area="Admin" asp-controller="Bookings" asp-action="Index"><i class="ti ti-calendar"></i> All bookings</a>
+        <a class="btn primary" asp-area="Admin" asp-controller="Users" asp-action="Index"><i class="ti ti-users"></i> Manage users</a>
+    </div>
+</div>
+
+<div class="stat-grid">
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-cash"></i></div>
+            <span class="delta @(((int)ViewBag.PendingPayoutsCount) > 0 ? "neg" : "pos")">
+                @ViewBag.PendingPayoutsCount pending
+            </span>
+        </div>
+        <div class="value">$@(((decimal)ViewBag.PendingPayoutsAmount).ToString("N2"))</div>
+        <div class="label">Recruiter payouts due</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-users"></i></div>
+            <span class="delta">@ViewBag.TotalCandidates candidates</span>
+        </div>
+        <div class="value">@ViewBag.TotalUsers</div>
+        <div class="label">Total users</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-briefcase"></i></div>
+            <span class="delta @(((int)ViewBag.PendingRecruiters) > 0 ? "" : "pos")">@ViewBag.PendingRecruiters pending</span>
+        </div>
+        <div class="value">@ViewBag.TotalRecruiterProfiles</div>
+        <div class="label">Recruiter profiles</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-calendar"></i></div>
+            <span class="delta pos"><i class="ti ti-trending-up"></i> @ViewBag.CompletedBookings done</span>
+        </div>
+        <div class="value">@ViewBag.TotalBookings</div>
+        <div class="label">Total bookings</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-message-star"></i></div>
+            <span class="delta">@ViewBag.PendingTestimonials pending</span>
+        </div>
+        <div class="value">@ViewBag.ApprovedTestimonials</div>
+        <div class="label">Approved testimonials</div>
+    </div>
+
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-star"></i></div>
+            <span class="delta @(((int)ViewBag.PendingReviews > 0) ? "neg" : "pos")">
+                @ViewBag.PendingReviews pending
+            </span>
+        </div>
+
+        <div class="value">@ViewBag.TotalReviews</div>
+
+        <div class="label">Reviews total</div>
+    </div>
+
+
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-inbox"></i></div>
+            <span class="delta @(((int)ViewBag.UnreadMessages) > 0 ? "neg" : "pos")">@ViewBag.UnreadMessages unread</span>
+        </div>
+        <div class="value">@ViewBag.TotalMessages</div>
+        <div class="label">Contact messages</div>
+    </div>
+
+
+
+    <div class="stat-card">
+        <div class="head">
+            <div class="icon-tile"><i class="ti ti-file-text"></i></div>
+            <span class="delta">@ViewBag.TotalATSResults analyses</span>
+        </div>
+        <div class="value">@ViewBag.TotalResumes</div>
+        <div class="label">Resumes uploaded</div>
+    </div>
+
+</div>
+
+<div class="card-x no-pad">
+    <div class="card-head">
+        <h2>Recent bookings</h2>
+        <a asp-area="Admin" asp-controller="Bookings" asp-action="Index" class="see-all">View all <i class="ti ti-arrow-right"></i></a>
+    </div>
+    <table class="tbl">
+        <thead><tr><th>Booking</th><th>Candidate</th><th>Recruiter</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+            @if (recent != null && recent.Any())
+            {
+                foreach (var b in recent)
+                {
+                    <tr>
+                        <td class="id-cell">#@b.Id</td>
+                        <td>
+                            <div class="person">
+                                <div class="avatar sm">@Initials(b.User?.FullName)</div>
+                                <div class="meta"><div class="name">@(b.User?.FullName ?? b.UserId)</div></div>
+                            </div>
+                        </td>
+                        <td>@(b.Recruiter?.FullName ?? "—")</td>
+                        <td class="muted-cell">@b.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><span class="badge @StatusTone(b.Status)">@b.Status</span></td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5"><div class="empty-state"><i class="ti ti-calendar-off"></i><div class="msg">No bookings yet.</div></div></td></tr>
+            }
+        </tbody>
+    </table>
+</div>

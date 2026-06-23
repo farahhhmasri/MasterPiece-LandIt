@@ -1,0 +1,53 @@
+body {
+    background: var(--bg) !important;
+}
+
+.shadow {
+    background: var(--surface) !important;
+    border: 0.5px solid var(--border) !important;
+    box-shadow: none !important;
+}
+
+h1, h2 {
+    color: var(--text) !important;
+}
+
+hr {
+    border-color: var(--border) !important;
+}
+
+.form-floating .form-control,
+.form-floating .form-select {
+    background: var(--surface2) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+    .form-floating .form-control:focus,
+    .form-floating .form-select:focus {
+        background: var(--surface2) !important;
+        border-color: rgba(79, 142, 247, 0.5) !important;
+        box-shadow: none !important;
+        color: var(--text) !important;
+    }
+
+.form-floating > label {
+    color: var(--muted) !important;
+}
+
+.form-select option {
+    background: var(--surface2);
+    color: var(--text);
+}
+
+.btn-primary {
+    background: var(--blue) !important;
+    border-color: var(--blue) !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px var(--surface2) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+}

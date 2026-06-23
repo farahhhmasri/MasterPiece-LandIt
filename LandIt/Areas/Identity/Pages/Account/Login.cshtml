@@ -1,0 +1,81 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+    ViewData["HideAds"] = true;
+    ViewData["UseBootstrap"] = true;
+}
+
+<div style="min-height: calc(100vh - 120px); display: flex; align-items: center; padding: 3rem 1rem;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-5">
+
+                <form id="account"
+                      method="post"
+                      style="background: var(--surface); border: 0.5px solid var(--border); border-radius: 20px; padding: 2.5rem;">
+
+                    <h2 style="font-family:'Sora',sans-serif; font-size:1.4rem; font-weight:700; text-align:center; color:var(--text); margin-bottom:0.5rem;">
+                        Welcome back
+                    </h2>
+                    <p style="text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:2rem;">
+                        Use your email to log in
+                    </p>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small" role="alert"></div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.Email"
+                               class="app-input"
+                               placeholder="Email"
+                               autocomplete="username"
+                               aria-required="true" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1rem;">
+                        <input asp-for="Input.Password"
+                               class="app-input"
+                               placeholder="Password"
+                               autocomplete="current-password"
+                               aria-required="true" />
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+
+                    <div style="margin-bottom:1.75rem; display:flex; align-items:center; gap:8px;">
+                        <input class="form-check-input"
+                               asp-for="Input.RememberMe"
+                               style="width:16px; height:16px; cursor:pointer; accent-color:var(--blue);" />
+                        <label asp-for="Input.RememberMe"
+                               style="font-size:0.85rem; color:var(--muted2); cursor:pointer; margin:0;">
+                            Remember me
+                        </label>
+                    </div>
+
+                    <button id="login-submit"
+                            type="submit"
+                            class="btn-primary"
+                            style="width:100%; justify-content:center; padding:0.75rem; font-size:0.95rem; text-align:center">
+                        Log in
+                    </button>
+
+                </form>
+
+                <div style="text-align:center; margin-top:1.25rem; font-size:0.875rem; color:var(--muted); display:flex; flex-direction:column; gap:0.4rem;">
+                    <a asp-page="./ForgotPassword" style="color:var(--blue); font-weight:500; text-decoration:none;">
+                        Forgot your password?
+                    </a>
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" style="color:var(--blue); font-weight:500;text-decoration:none;">
+                        Create a new account
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

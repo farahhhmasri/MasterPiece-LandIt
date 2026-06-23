@@ -1,0 +1,104 @@
+@model IEnumerable<LandIt.Models.AppUser>
+@{
+    ViewData["Title"] = "Users";
+    var roles = ViewBag.Roles as Dictionary<string, IList<string>>;
+    var filter = ViewBag.Filter as string;
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+}
+
+<div class="page-head">
+    <div>
+        <h1>Users</h1>
+        <div class="sub">@Model.Count() accounts · promote, suspend or remove members.</div>
+    </div>
+    <div class="actions">
+        <form method="get" class="search-field" style="display:inline-flex;">
+            <i class="ti ti-search"></i>
+            <input type="text" name="q" value="@ViewBag.Query" placeholder="Search name or email…" />
+        </form>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="filter-tabs">
+        <a class="@(string.IsNullOrEmpty(filter) ? "active" : "")" asp-action="Index">All</a>
+        <a class="@(filter == "Candidate" ? "active" : "")" asp-action="Index" asp-route-role="Candidate">Candidates</a>
+        <a class="@(filter == "Recruiter" ? "active" : "")" asp-action="Index" asp-route-role="Recruiter">Recruiters</a>
+        <a class="@(filter == "Admin" ? "active" : "")" asp-action="Index" asp-route-role="Admin">Admins</a>
+    </div>
+</div>
+
+<div class="card-x no-pad">
+    <table class="tbl">
+        <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th class="right-align">Actions</th></tr></thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="5"><div class="empty-state"><i class="ti ti-user-off"></i><div class="msg">No users match this filter.</div></div></td></tr>
+            }
+            @foreach (var u in Model)
+            {
+                var rs = roles != null && roles.ContainsKey(u.Id) ? roles[u.Id] : new List<string>();
+                var locked = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow;
+                var roleLabel = rs.Contains("Admin") ? "Admin" : rs.Contains("Recruiter") ? "Recruiter" : "Candidate";
+                <tr>
+                    <td>
+                        <div class="person">
+                            <div class="avatar md">@Initials(u.FullName)</div>
+                            <div class="meta">
+                                <div class="name">@u.FullName</div>
+                                <div class="sub">@u.Email</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge info">@roleLabel</span></td>
+                    <td>
+                        @if (locked) { <span class="badge danger">Suspended</span> }
+                        else { <span class="badge success">Active</span> }
+                    </td>
+                    <td class="muted-cell">@u.CreatedAt?.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <div class="actions-row">
+                            @if (!rs.Contains("Admin"))
+                            {
+                                if (!rs.Contains("Recruiter"))
+                                {
+                                    <form asp-action="Promote" asp-route-id="@u.Id" method="post">@Html.AntiForgeryToken()
+                                        <button class="btn sm secondary" title="Promote to Recruiter"><i class="ti ti-arrow-up"></i> Promote</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Demote" asp-route-id="@u.Id" method="post">@Html.AntiForgeryToken()
+                                        <button class="btn sm secondary"><i class="ti ti-arrow-down"></i> Demote</button>
+                                    </form>
+                                }
+
+                                if (locked)
+                                {
+                                    <form asp-action="Activate" asp-route-id="@u.Id" method="post">@Html.AntiForgeryToken()
+                                        <button class="btn sm success-soft"><i class="ti ti-check"></i> Activate</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Suspend" asp-route-id="@u.Id" method="post">@Html.AntiForgeryToken()
+                                        <button class="btn sm warning-soft"><i class="ti ti-ban"></i> Suspend</button>
+                                    </form>
+                                }
+
+                                <form asp-action="Delete" asp-route-id="@u.Id" method="post" onsubmit="return confirm('Delete this user permanently?');">@Html.AntiForgeryToken()
+                                    <button class="btn sm danger-soft" title="Delete"><i class="ti ti-trash"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span style="color:var(--muted); font-size:12.5px;">protected</span>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,165 @@
+﻿@model LandIt.Models.ViewModels.ATSUploadViewModel
+@{
+    ViewData["Title"] = "ATS Resume Analyzer";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" style="max-width:720px;">
+        
+    <!--Header-->
+    <div style="margin-bottom:2rem;">
+        <a href="/Account/DashboardRouter"
+           style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Dashboard
+        </a>
+        <br />
+
+        <a href="/Account/MyResumes"
+            style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to My Resumes
+        </a>
+        <div class="sec-eyebrow">AI-Powered</div>
+        <h1 class="sec-title" style="margin-bottom:0.5rem;">ATS Resume Analyzer</h1>
+        <p class="step-desc">
+            Upload your resume and paste the job description. Our AI will score your resume,
+            identify missing keywords, and generate an ATS-optimised version.
+        </p>
+    </div>
+
+    <!--Error Summary-->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#ef4444;">
+            <div asp-validation-summary="ModelOnly"></div>
+        </div>
+    }
+
+
+    <form asp-action="Analyze" method="post" enctype="multipart/form-data" id="atsForm">
+        @Html.AntiForgeryToken()
+                    
+            <!--Step 1: Upload-->
+            <div class="app-card" style="margin-bottom:1.25rem;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Upload your resume</p>
+                </div>
+
+                <label class="app-label">Resume file</label>
+                <input asp-for="ResumeFile"
+                        type="file"
+                        class="app-input"
+                        accept=".pdf,.docx"
+                        id="resumeFileInput"
+                        style="padding:0.5rem 1rem;cursor:pointer;" />
+                <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                    PDF or DOCX · Max 5 MB
+                </div>
+                <span asp-validation-for="ResumeFile" style="font-size:0.78rem;color:#ef4444;"></span>
+
+                    <!--File name preview-->
+                    <div id="filePreview"
+                            style="display:none;margin-top:0.75rem;padding:0.6rem 1rem;background:var(--blue-dim);border:0.5px solid rgba(79,142,247,0.3);border-radius:8px;font-size:0.82rem;color:var(--blue);display:flex;align-items:center;gap:8px;">
+                        <i class="ti ti-file-text" aria-hidden="true"></i>
+                        <span id="fileName"></span>
+                    </div>
+                </div>
+
+            <!-- Step 2: Job details -->
+            <div class="app-card" style="margin-bottom:1.25rem;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Target job details</p>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="JobTitle" class="app-label">Job title</label>
+                        <input asp-for="JobTitle"
+                                class="app-input"
+                                placeholder="e.g. Senior Backend Engineer" />
+                        <span asp-validation-for="JobTitle" style="font-size:0.78rem;color:#ef4444;"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="CompanyName" class="app-label">
+                            Company <span style="font-weight:300;color:var(--muted);">(optional)</span>
+                        </label>
+                        <input asp-for="CompanyName"
+                                class="app-input"
+                                placeholder="e.g. Stripe" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ExperienceLevel" class="app-label">Experience level</label>
+                    <select asp-for="ExperienceLevel" class="app-input">
+                        <option value="entry">Entry level (0–2 years)</option>
+                        <option value="mid" selected>Mid level (2–5 years)</option>
+                        <option value="senior">Senior level (5–10 years)</option>
+                        <option value="lead">Lead / Principal (10+ years)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label asp-for="JobDescription" class="app-label">Job description</label>
+                    <textarea asp-for="JobDescription"
+                                class="app-input"
+                                rows="8"
+                                placeholder="Paste the full job posting here. The more detail you provide, the more accurate the analysis."
+                                style="resize:vertical;"></textarea>
+                    <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                        Paste the complete job description for best results.
+                    </div>
+                    <span asp-validation-for="JobDescription" style="font-size:0.78rem;color:#ef4444;"></span>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit"
+                        class="btn-primary"
+                        id="submitBtn"
+                        style="width:100%;padding:0.85rem;font-size:0.95rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></span>
+                    <i class="ti ti-scan" id="btnIcon" aria-hidden="true"></i>
+                    <span id="btnText">Analyze My Resume</span>
+                </button>
+
+            <p style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:0.75rem;">
+                Analysis takes 10–20 seconds. Please don't close this page.
+            </p>
+    </form>
+ </div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // File name preview
+        document.getElementById('resumeFileInput').addEventListener('change', function () {
+            var preview = document.getElementById('filePreview');
+            var nameEl  = document.getElementById('fileName');
+            if (this.files.length > 0) {
+                nameEl.textContent = this.files[0].name;
+                preview.style.display = 'flex';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Loading state on submit
+        document.getElementById('atsForm').addEventListener('submit', function () {
+            var btn    = document.getElementById('submitBtn');
+            var spinner = document.getElementById('spinner');
+            var icon   = document.getElementById('btnIcon');
+            var text   = document.getElementById('btnText');
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+            icon.classList.add('d-none');
+            text.textContent = 'Analyzing your resume…';
+        });
+    </script>
+}

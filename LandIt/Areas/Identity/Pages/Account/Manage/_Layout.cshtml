@@ -1,0 +1,132 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<LandIt.Models.AppUser> UserManager
+@inject Microsoft.AspNetCore.Identity.SignInManager<LandIt.Models.AppUser> SignInManager
+@{
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+
+    if (isAdmin)
+    {
+        Layout = null;
+    }
+    else if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    }
+
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+}
+
+@if (isAdmin)
+{
+    <!DOCTYPE html>
+    <html lang="en" data-theme="light">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>@ViewData["Title"] — LandIt Admin</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
+        <link rel="stylesheet" href="~/css/landit.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/identity.css" asp-append-version="true" />
+        <script src="~/js/theme.js" asp-append-version="true"></script>
+    </head>
+    <body>
+        <div class="admin-shell">
+            <aside class="admin-sidebar">
+                <div class="sidebar-brand">
+                    <div class="logo">Land<span>It</span></div>
+                    <span class="badge-admin-pill">ADMIN</span>
+                </div>
+
+                <nav class="admin-nav">
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="Index"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index"><i class="ti ti-users"></i>Users</a>
+                    <a asp-area="Admin" asp-controller="Recruiters" asp-action="Index"><i class="ti ti-briefcase"></i>Recruiters</a>
+                    <a asp-area="Admin" asp-controller="Bookings" asp-action="Index"><i class="ti ti-calendar"></i>Bookings</a>
+                    <a asp-area="Admin" asp-controller="Testimonials" asp-action="Index"><i class="ti ti-message-star"></i>Testimonials</a>
+                    <a asp-area="Admin" asp-controller="ContactMessages" asp-action="Index"><i class="ti ti-inbox"></i>Messages</a>
+                </nav>
+
+                <div class="sidebar-foot">
+                    <button class="theme-btn" type="button" id="themeToggle"><i class="ti ti-moon" id="themeIcon"></i><span id="themeLabel">Dark mode</span></button>
+                    <a class="profile-card" asp-area="Admin" asp-controller="Admin" asp-action="Profile">
+                        <div class="avatar md">@Initials(user!.FullName)</div>
+                        <div>
+                            <div class="name">@user.FullName</div>
+                            <div class="role">Administrator</div>
+                        </div>
+                    </a>
+                    <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                        <button type="submit" class="logout-btn"><i class="ti ti-logout"></i>Sign out</button>
+                    </form>
+                </div>
+            </aside>
+
+            <main class="admin-main">
+                <div class="page-head">
+                    <div>
+                        <a asp-area="Admin" asp-controller="Admin" asp-action="Profile" class="btn sm ghost" style="margin-bottom:8px;"><i class="ti ti-arrow-left"></i> Back to profile</a>
+                        <h1>Account settings</h1>
+                        <div class="sub">Manage your account credentials and security.</div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:240px 1fr; gap:18px; align-items:start;">
+                    <aside class="card-x" style="padding:8px;">
+                        <partial name="_ManageNav" />
+                    </aside>
+                    <section class="card-x">
+                        @RenderBody()
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                var icon = document.getElementById('themeIcon');
+                var label = document.getElementById('themeLabel');
+                function sync() {
+                    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    icon.className = 'ti ' + (dark ? 'ti-sun' : 'ti-moon');
+                    label.textContent = dark ? 'Light mode' : 'Dark mode';
+                }
+                btn?.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme') || 'light';
+                    var next = cur === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('landit-theme', next); } catch (e) { }
+                    sync();
+                });
+                sync();
+            })();
+        </script>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
+    </html>
+}
+else
+{
+    <h1>Manage your account</h1>
+    <div>
+        <h2>Change your account settings</h2>
+        <hr />
+        <div class="row">
+            <div class="col-md-3">
+                <partial name="_ManageNav" />
+            </div>
+            <div class="col-md-9">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        @RenderSection("Scripts", required: false)
+    }
+}

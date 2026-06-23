@@ -1,0 +1,25 @@
+@model string
+@inject Microsoft.AspNetCore.Identity.UserManager<LandIt.Models.AppUser> UserManager
+@{
+    var u = await UserManager.GetUserAsync(User);
+    var isAdmin = u != null && await UserManager.IsInRoleAsync(u, "Admin");
+}
+
+@if (!String.IsNullOrEmpty(Model))
+{
+    var isError = Model.StartsWith("Error");
+    if (isAdmin)
+    {
+        <div class="alert-x @(isError ? "error" : "success")">
+            <i class="ti @(isError ? "ti-alert-circle" : "ti-circle-check")"></i> @Model
+        </div>
+    }
+    else
+    {
+        var statusMessageClass = isError ? "danger" : "success";
+        <div class="alert alert-@statusMessageClass alert-dismissible" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            @Model
+        </div>
+    }
+}

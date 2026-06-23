@@ -1,0 +1,132 @@
+﻿@model List<LandIt.Models.Testimonial>
+@{
+    ViewData["Title"] = "My Testimonials";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" style="max-width:680px;">
+
+    <!--Back link -->
+    <a href="/Account/ProfileRouter" style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.5rem;">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Profile
+    </a>
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+        <div>
+            <div class="sec-eyebrow">Your feedback</div>
+            <h1 class="sec-title" style="margin-bottom:0.25rem;">My Testimonials</h1>
+            <p class="step-desc">Testimonials you have submitted about LandIt.</p>
+        </div>
+        <a href="@Url.Action("Create", "Testimonial")"
+           class="btn-primary"
+           style="display:inline-flex;align-items:center;gap:6px;padding:0.55rem 1.25rem;text-decoration:none;white-space:nowrap;">
+            <i class="ti ti-plus" aria-hidden="true"></i> Add another
+        </a>
+    </div>
+
+    <!-- Flash messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div style="background:rgba(34,197,94,0.1);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#16a34a;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-circle-check" aria-hidden="true"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#dc2626;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <!-- Empty state -->
+        <div class="app-card" style="text-align:center;padding:3rem 2rem;">
+            <i class="ti ti-message-star" aria-hidden="true"
+               style="font-size:2.5rem;color:var(--muted);display:block;margin-bottom:1rem;"></i>
+            <p style="font-size:0.95rem;font-weight:500;color:var(--text);margin-bottom:0.4rem;">
+                No testimonials yet
+            </p>
+            <p style="font-size:0.85rem;color:var(--muted2);margin-bottom:1.5rem;">
+                Share your experience with LandIt to help other job seekers.
+            </p>
+            <a href="@Url.Action("Create", "Testimonial")"
+               class="btn-primary"
+               style="display:inline-flex;align-items:center;gap:6px;padding:0.6rem 1.5rem;text-decoration:none;">
+                <i class="ti ti-message-star" aria-hidden="true"></i> Write a testimonial
+            </a>
+        </div>
+    }
+    else
+    {
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+            @foreach (var t in Model)
+            {
+                <!-- Status colors -->
+                string statusBg    = t.IsApproved ? "rgba(34,197,94,0.1)"  : "rgba(251,191,36,0.1)";
+                string statusColor = t.IsApproved ? "#16a34a"              : "#d97706";
+                string statusIcon  = t.IsApproved ? "ti-circle-check"      : "ti-clock";
+                string statusLabel = t.IsApproved ? "Published"            : "Pending review";
+                
+
+                <div class="app-card">
+
+                    <!-- Top row: source + status + date -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;gap:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:0.72rem;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--blue-dim);color:var(--blue);">
+                                @t.Source?.ToString().Replace("ATSAnalyzer", "ATS Analyzer").Replace("QuestionGenerator", "Question Generator").Replace("MockInterview", "Mock Interview")
+                            </span>
+                            <span style="font-size:0.72rem;font-weight:500;padding:3px 10px;border-radius:100px;background:@statusBg;color:@statusColor;display:inline-flex;align-items:center;gap:4px;">
+                                <i class="ti @statusIcon" aria-hidden="true" style="font-size:0.75rem;"></i>
+                                @statusLabel
+                            </span>
+                        </div>
+                        <span style="font-size:0.75rem;color:var(--muted);">
+                            @t.CreatedAt.ToString("MMM dd, yyyy")
+                        </span>
+                    </div>
+
+                    <!-- Star rating -->
+                    <div style="margin-bottom:0.75rem;">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <span style="font-size:1rem;color:@(i <= t.Rating ? "#f59e0b" : "var(--muted)");">★</span>
+                        }
+                    </div>
+
+                    <!-- Content -->    
+                    <p style="font-size:0.9rem;color:var(--muted2);line-height:1.7;margin:0 0 1rem;font-style:italic;">
+                        "@t.Content"
+                    </p>
+
+                    <!--Delete button — only if not yet approved -->
+                    @if (!t.IsApproved)
+                    {
+                        <form asp-action="Delete" asp-route-id="@t.Id" method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this testimonial?');"
+                              style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    style="background:none;border:none;cursor:pointer;font-size:0.78rem;color:#dc2626;display:inline-flex;align-items:center;gap:4px;padding:0;">
+                                <i class="ti ti-trash" aria-hidden="true"></i> Delete
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">
+                            <i class="ti ti-lock" aria-hidden="true"></i>
+                            Published testimonials cannot be deleted. Contact support if needed.
+                        </p>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+</div>
+

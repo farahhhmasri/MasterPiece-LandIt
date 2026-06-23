@@ -1,0 +1,72 @@
+@model IEnumerable<LandIt.Models.Recruiter>
+@{
+    ViewData["Title"] = "Recruiters";
+    var f = ViewBag.Filter as string;
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+    string Tone(LandIt.Models.RecruiterStatus s) => s switch {
+        LandIt.Models.RecruiterStatus.Approved => "success",
+        LandIt.Models.RecruiterStatus.Pending => "warning",
+        LandIt.Models.RecruiterStatus.Rejected => "danger",
+        _ => "neutral"
+    };
+}
+
+<div class="page-head">
+    <div>
+        <h1>Recruiters</h1>
+        <div class="sub">@Model.Count() recruiter profiles · approve, suspend or review.</div>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="filter-tabs">
+        <a class="@(string.IsNullOrEmpty(f) ? "active" : "")" asp-action="Index">All</a>
+        @foreach (var s in Enum.GetNames<LandIt.Models.RecruiterStatus>())
+        {
+            <a class="@(f == s ? "active" : "")" asp-action="Index" asp-route-status="@s">@s</a>
+        }
+    </div>
+</div>
+
+<div class="card-x no-pad">
+    <table class="tbl">
+        <thead><tr><th>Recruiter</th><th>Company</th><th>Region</th><th>Rate</th><th>Rating</th><th>Status</th><th class="right-align">Actions</th></tr></thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="7"><div class="empty-state"><i class="ti ti-briefcase-off"></i><div class="msg">No recruiters match this filter.</div></div></td></tr>
+            }
+            @foreach (var r in Model)
+            {
+                var avg = r.Reviews != null && r.Reviews.Any() ? r.Reviews.Average(x => x.Rating) : 0;
+                <tr>
+                    <td>
+                        <div class="person">
+                            <div class="avatar md">@Initials(r.FullName)</div>
+                            <div class="meta">
+                                <div class="name">@r.FullName</div>
+                                <div class="sub">@r.Title</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@r.Company</td>
+                    <td class="muted-cell">@r.Region</td>
+                    <td>$@r.HourlyRate</td>
+                    <td>
+                        @if (avg > 0)
+                        {
+                            <span class="stars"><i class="ti ti-star-filled"></i> @avg.ToString("0.0") <span style="color:var(--muted); font-weight:400;">(@r.Reviews.Count)</span></span>
+                        }
+                        else { <span class="muted-cell">—</span> }
+                    </td>
+                    <td><span class="badge @Tone(r.Status)">@r.Status</span></td>
+                    <td>
+                        <div class="actions-row">
+                            <a asp-action="Details" asp-route-id="@r.Id" class="btn sm secondary"><i class="ti ti-eye"></i> View</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

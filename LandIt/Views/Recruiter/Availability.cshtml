@@ -1,0 +1,196 @@
+﻿@model LandIt.Models.Recruiter
+@{
+    ViewData["Title"] = "Availability";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var days = new Dictionary<int, string>
+    {
+        { 0, "Sunday" }, { 1, "Monday" }, { 2, "Tuesday" },
+        { 3, "Wednesday" }, { 4, "Thursday" }, { 5, "Friday" }, { 6, "Saturday" }
+    };
+}
+
+<div class="app-container">
+
+    <!--Header-->
+    <div style="margin-bottom:2rem;">
+        <a href="/Recruiter/Dashboard"
+           style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Dashboard
+        </a>
+        <div class="sec-eyebrow">Schedule</div>
+        <h1 class="sec-title" style="margin-bottom:0.25rem;">Your Availability</h1>
+        <p class="step-desc">Set your weekly schedule so candidates know when they can book sessions with you.</p>
+    </div>
+
+    <!-- Flash messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div style="background:rgba(34,197,94,0.1);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#16a34a;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-circle-check" aria-hidden="true"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#dc2626;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i> @TempData["Error"]
+        </div>
+    }
+
+
+    <!-- Info card -->
+    <div class="app-card my-4" style="background:var(--blue-dim);border-color:rgba(79,142,247,0.25);">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+            <i class="ti ti-info-circle" aria-hidden="true" style="color:var(--blue);font-size:1rem;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+                <p style="font-size:0.82rem;font-weight:500;color:var(--blue);margin:0 0 4px;">How availability works</p>
+                <p style="font-size:0.78rem;color:var(--muted2);margin:0;line-height:1.6;">
+                    Each slot defines a recurring weekly window. For example, adding
+                    Monday 09:00–12:00 means candidates can book any Monday morning session.
+                    The system generates individual bookable time slots from your availability.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Left column — add availability form -->
+        <div class="col-md-5">
+            <div class="app-card">
+
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                    <i class="ti ti-calendar-plus" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Add Availability</p>
+                </div>
+
+                <form asp-action="AddAvailability" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="app-label">Day of week</label>
+                        <select name="DayOfWeek" class="app-input" required>
+                            @foreach (var day in days)
+                            {
+                                <option value="@day.Key">@day.Value</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="app-label">Start time</label>
+                            <input type="time" name="StartTime" class="app-input" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="app-label">End time</label>
+                            <input type="time" name="EndTime" class="app-input" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="app-label">Timezone</label>
+                        <input name="TimeZone" class="app-input" value="UTC" readonly
+                               style="opacity:0.6;cursor:not-allowed;" />
+                        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                            Timezone support coming soon. All times are in UTC.
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn-primary"
+                            style="width:100%;padding:0.75rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <i class="ti ti-plus" aria-hidden="true"></i> Add Availability
+                    </button>
+                </form>
+            </div>
+
+            
+        </div>
+
+        <!-- Right column — current availability -->
+        <div class="col-md-7">
+            <div class="app-card">
+
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <i class="ti ti-calendar-week" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                        <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Current Schedule</p>
+                    </div>
+                    @if (Model.Availabilities != null && Model.Availabilities.Any())
+                    {
+                        <span style="font-size:0.75rem;color:var(--muted);">
+                            @Model.Availabilities.Count() slot@(Model.Availabilities.Count() != 1 ? "s" : "")
+                        </span>
+                    }
+                </div>
+
+                @if (Model.Availabilities == null || !Model.Availabilities.Any())
+                {
+                    <div style="text-align:center;padding:2.5rem 1rem;">
+                        <i class="ti ti-calendar-off" aria-hidden="true"
+                           style="font-size:2.5rem;color:var(--muted);display:block;margin-bottom:1rem;"></i>
+                        <p style="font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:0.4rem;">
+                            No availability set
+                        </p>
+                        <p style="font-size:0.82rem;color:var(--muted2);margin:0;">
+                            Add your first availability slot using the form on the left.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <!-- Group by day of week -->
+                    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                        @foreach (var slot in Model.Availabilities.OrderBy(a => a.DayOfWeek))
+                        {
+                            <div style="display:flex;align-items:center;gap:12px;padding:0.85rem 1rem;background:var(--surface2);border-radius:10px;">
+
+                                <!-- Day badge -->
+                                <div style="width:42px;height:42px;border-radius:10px;background:var(--blue-dim);color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <span style="font-size:0.6rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;line-height:1;">
+                                        @slot.DayName.Substring(0, 3)
+                                    </span>
+                                </div>
+
+                                <!-- Time info -->
+                                <div style="flex:1;min-width:0;">
+                                    <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">
+                                        @slot.DayName
+                                    </p>
+                                    <p style="font-size:0.78rem;color:var(--muted2);margin:0;display:flex;align-items:center;gap:6px;">
+                                        <i class="ti ti-clock" aria-hidden="true" style="font-size:0.8rem;"></i>
+                                        @slot.StartTime.ToString(@"hh\:mm") — @slot.EndTime.ToString(@"hh\:mm")
+                                        <span style="color:var(--muted);">· @slot.TimeZone</span>
+                                    </p>
+                                </div>
+
+                                <!-- Duration badge -->
+                                <span style="font-size:0.72rem;font-weight:500;padding:3px 8px;border-radius:100px;background:rgba(34,197,94,0.1);color:#16a34a;flex-shrink:0;">
+                                    @((int)slot.Duration.TotalHours)h @(slot.Duration.Minutes > 0 ? slot.Duration.Minutes + "m" : "")
+                                </span>
+
+                                <!-- Remove button -->
+                                <form asp-action="RemoveAvailability" method="post"
+                                      onsubmit="return confirm('Remove this availability slot?');"
+                                      style="margin:0;flex-shrink:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@slot.Id" />
+                                    <button type="submit"
+                                            style="background:none;border:0.5px solid rgba(239,68,68,0.3);color:#dc2626;font-size:0.78rem;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:4px;">
+                                        <i class="ti ti-trash" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

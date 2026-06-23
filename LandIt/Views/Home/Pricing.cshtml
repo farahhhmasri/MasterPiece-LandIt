@@ -1,0 +1,101 @@
+﻿@{
+    ViewData["Title"] = "Pricing";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@inject Microsoft.AspNetCore.Identity.UserManager<LandIt.Models.AppUser> UserManager
+
+
+<section class="hero" style="padding-bottom: 2rem;">
+    <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        Simple Pricing
+    </div>
+    <h1>
+        Everything is <span class="accent">free</span>.<br>
+        <span class="dim">Only pay for personal coaching.</span>
+    </h1>
+    <p class="hero-sub">
+        All core tools — resume builder, ATS analysis, and job insights — are free forever.
+        The only time you pay is when you book a one-on-one session with a recruiter to sharpen your interview skills.
+    </p>
+    <div class="hero-ctas">
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/Account/DashboardRouter" class="btn-primary btn-large" style="text-decoration:none;">
+                View Coaching Rates
+            </a>
+        }
+        else
+        {
+            <a href="/Identity/Account/Login?returnUrl=Home/Pricing" class="btn-primary btn-large" style="text-decoration:none;">
+                View Coaching Rates
+            </a>
+        }
+
+    </div>
+</section>
+
+<!-- Free Forever Highlight -->
+<section class="features-section" style="padding-top: 2rem;">
+    <div class="sec-eyebrow">What you get</div>
+    <h2 class="sec-title">Free for everyone</h2>
+
+    <div class="feat-grid">
+        <div class="feat-card">
+            <div class="feat-icon">✨</div>
+            <div class="feat-tag">Free</div>
+            <div class="feat-title">AI Resume Builder</div>
+            <div class="feat-desc">
+                Generate tailored, ATS-friendly resumes in seconds. No limits, no watermarks, no credit card required.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+
+        <div class="feat-card">
+            <div class="feat-icon">🎯</div>
+            <div class="feat-tag">Free</div>
+            <div class="feat-title">ATS Analysis</div>
+            <div class="feat-desc">
+                Check how your resume scores against applicant tracking systems and get actionable improvement tips.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+
+        @* <div class="feat-card">
+            <div class="feat-icon">🔍</div>
+            <div class="feat-tag">Free</div>
+            <div class="feat-title">Job Matching</div>
+            <div class="feat-desc">
+                Discover roles that fit your skills and experience with smart, personalized recommendations.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div> *@
+
+        <div class="feat-card">
+            <div class="feat-icon">📊</div>
+            <div class="feat-tag">Free</div>
+            <div class="feat-title">Career Insights</div>
+            <div class="feat-desc">
+                Track your progress and see what skills top candidates in your position have.
+            </div>
+            <div class="feat-arrow">→</div>
+        </div>
+    </div>
+</section>
+
+<!-- Paid Section: 1-to-1 Interviews -->
+<section id="interview-pricing" class="how-section" style="background: var(--surface); margin-top: 2rem;">
+    <div class="how-inner">
+        <div class="sec-eyebrow">Premium Coaching</div>
+        <h2 class="sec-title" style="margin-bottom: 1rem;">Ace your next interview</h2>
+        <p class="hero-sub" style="max-width: 560px; margin-bottom: 2.5rem;">
+            Book a private, one-on-one session with experienced recruiters. Get personalized feedback, mock interviews, and negotiation strategies. Pricing depends on the recruiter you choose and their hourly rate.
+        </p>
+
+    </div>
+</section>
+

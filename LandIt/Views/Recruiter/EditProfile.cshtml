@@ -1,0 +1,176 @@
+﻿@model LandIt.Models.Recruiter
+@{
+    ViewData["Title"] = "Edit Profile";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    ViewData["HideAds"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="app-container">
+
+    <!--Back link + header-->
+    <div style="margin-bottom:2rem;">
+        <a href="/Recruiter/Profile"
+            style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Profile
+        </a>
+        <div class="sec-eyebrow">Recruiter</div>
+        <h1 class="sec-title" style="margin-bottom:0.25rem;">Edit Profile</h1>
+        <p class="step-desc">Update your recruiter information. Your current password is required to save any changes.</p>
+    </div>
+
+
+    <!--Flash messages-->
+    @if (TempData["Success"] != null)
+    {
+        <div style="background:rgba(34,197,94,0.1);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#16a34a;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-circle-check" aria-hidden="true"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:0.5px solid rgba(239,68,68,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#dc2626;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i> @TempData["Error"]
+        </div>
+    }
+
+
+
+    <div class="row g-4">
+
+        <!--Left column — profile form-->
+        <div class="col-md-7">
+            <div class="app-card">
+
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                    <i class="ti ti-user" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Profile Information</p>
+                </div>
+
+                <form asp-action="EditProfile" asp-controller="Recruiter" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="FullName" class="app-label">Full name</label>
+                            <input asp-for="FullName" class="app-input" placeholder="Your full name" />
+                            <span asp-validation-for="FullName" style="font-size:0.78rem;color:#ef4444;"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Title" class="app-label">Job title</label>
+                            <input asp-for="Title" class="app-input" placeholder="e.g. Senior Recruiter" />
+                            <span asp-validation-for="Title" style="font-size:0.78rem;color:#ef4444;"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Company" class="app-label">Company</label>
+                        <input asp-for="Company" class="app-input" placeholder="e.g. Google" />
+                        <span asp-validation-for="Company" style="font-size:0.78rem;color:#ef4444;"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="linkedInURL" class="app-label">LinkedIn URL</label>
+                        <input asp-for="linkedInURL" class="app-input" placeholder="e.g. https://linkedin.com/in/yourname" />
+                        <span asp-validation-for="linkedInURL" style="font-size:0.78rem;color:#ef4444;"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Region" class="app-label">Region</label>
+                            <select asp-for="Region"
+                                    asp-items="Html.GetEnumSelectList<LandIt.Models.Region>()"
+                                    class="app-input"></select>
+                            <span asp-validation-for="Region" style="font-size:0.78rem;color:#ef4444;"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="HourlyRate" class="app-label">Hourly rate (USD)</label>
+                            <input asp-for="HourlyRate" type="number" step="0.01" min="0"
+                                    class="app-input" placeholder="e.g. 75" />
+                            <span asp-validation-for="HourlyRate" style="font-size:0.78rem;color:#ef4444;"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Skills" class="app-label">Skills</label>
+                        <textarea asp-for="Skills" class="app-input" rows="3"
+                                    placeholder="e.g. React, Node.js, Product Management, SQL"
+                                    style="resize:vertical;"></textarea>
+                        <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">
+                            Separate skills with commas. These appear as badges on your public profile.
+                        </div>
+                    </div>
+
+                        <!--Current password required-->
+                        <div style="padding:0.85rem 1rem;background:var(--blue-dim);border:0.5px solid rgba(79,142,247,0.25);border-radius:10px;margin-bottom:1rem;">
+                            <div style="display:flex;align-items:center;gap:6px;margin-bottom:0.6rem;">
+                                <i class="ti ti-lock" aria-hidden="true" style="color:var(--blue);font-size:0.9rem;"></i>
+                                <span style="font-size:0.82rem;font-weight:500;color:var(--blue);">Password required to save changes</span>
+                            </div>
+                            <input name="CurrentPassword"
+                                    type="password"
+                                    class="app-input"
+                                    placeholder="Enter your current password"
+                                    required
+                                    style="background:var(--surface);" />
+                        </div>
+
+                        <button type="submit"
+                                class="btn-primary"
+                                style="width:100%;padding:0.75rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                            <i class="ti ti-device-floppy" aria-hidden="true"></i>
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        <!--Right column — change password-->
+        <div class="col-md-5">
+            <div class="app-card">
+
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                    <i class="ti ti-key" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Change Password</p>
+                </div>
+
+                <form asp-action="ChangePassword" asp-controller="Recruiter" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="app-label">Current password</label>
+                        <input name="OldPassword" type="password" class="app-input"
+                                placeholder="Your current password" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="app-label">New password</label>
+                        <input name="NewPassword" type="password" class="app-input"
+                                placeholder="At least 6 characters" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="app-label">Confirm new password</label>
+                        <input name="ConfirmPassword" type="password" class="app-input"
+                                placeholder="Repeat new password" required />
+                    </div>
+
+                    <button type="submit"
+                            class="btn-ghost"
+                            style="width:100%;padding:0.75rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <i class="ti ti-lock-check" aria-hidden="true"></i>
+                        Update Password
+                    </button>
+                </form>
+            </div>                                  
+
+        </div>
+    </div>
+
+</div>
+@section Scripts {
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+}

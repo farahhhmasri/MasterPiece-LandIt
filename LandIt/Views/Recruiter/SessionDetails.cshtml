@@ -1,0 +1,207 @@
+﻿@model LandIt.Models.Booking
+@{
+    ViewData["Title"] = "Session Details";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string statusBg = Model.Status == LandIt.Models.BookingStatus.Confirmed ? "rgba(34,197,94,0.1)"
+                       : Model.Status == LandIt.Models.BookingStatus.Pending ? "rgba(251,191,36,0.1)"
+                       : Model.Status == LandIt.Models.BookingStatus.Completed ? "rgba(79,142,247,0.1)"
+                       : "rgba(239,68,68,0.1)";
+    string statusColor = Model.Status == LandIt.Models.BookingStatus.Confirmed ? "#16a34a"
+                       : Model.Status == LandIt.Models.BookingStatus.Pending ? "#d97706"
+                       : Model.Status == LandIt.Models.BookingStatus.Completed ? "#4f8ef7"
+                       : "#dc2626";
+    string statusIcon = Model.Status == LandIt.Models.BookingStatus.Confirmed ? "ti-circle-check"
+                       : Model.Status == LandIt.Models.BookingStatus.Pending ? "ti-clock"
+                       : Model.Status == LandIt.Models.BookingStatus.Completed ? "ti-rosette"
+                       : "ti-circle-x";
+}
+
+<div class="app-container">
+
+    <!--Back link-->
+        <a href="@Url.Action("Bookings", "Recruiter")"
+           style="font-size:0.82rem;color:var(--muted2);display:inline-flex;align-items:center;gap:4px;text-decoration:none;margin-bottom:1.5rem;">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Bookings
+        </a>
+
+        <!-- Flash messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div style="background:rgba(34,197,94,0.1);border:0.5px solid rgba(34,197,94,0.25);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:#16a34a;display:flex;align-items:center;gap:8px;">
+                    <i class="ti ti-circle-check" aria-hidden="true"></i> @TempData["Success"]
+                </div>
+            }
+
+            <div class="row g-4">
+
+                <!-- Left column — session overview -->
+                    <div class="col-md-4">
+
+                        <!-- Status card -->
+                            <div class="app-card text-center" style="margin-bottom:1rem;">
+
+                                <div style="width:56px;height:56px;border-radius:50%;background:@statusBg;color:@statusColor;font-size:1.5rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                                    <i class="ti @statusIcon" aria-hidden="true"></i>
+                                </div>
+
+                                <p style="font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:4px;">
+                                    @Model.JobTitle
+                                </p>
+                                @if (!string.IsNullOrWhiteSpace(Model.CompanyTarget))
+                                {
+                                    <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:12px;">@Model.CompanyTarget</p>
+                                }
+
+                                <span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:500;padding:4px 12px;border-radius:100px;background:@statusBg;color:@statusColor;border:0.5px solid @statusColor;">
+                                    <i class="ti @statusIcon" aria-hidden="true" style="font-size:0.75rem;"></i>
+                                    @Model.Status
+                                </span>
+                            </div>
+
+                            <!-- Candidate card -->
+                                <div class="app-card">
+                                    <p style="font-size:0.7rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Candidate</p>
+
+                                    <div style="display:flex;align-items:center;gap:12px;">
+                                        <div style="width:42px;height:42px;border-radius:50%;background:var(--blue-dim);color:var(--blue);font-size:1rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            @(Model.User?.FullName?.Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <p style="font-size:0.9rem;font-weight:600;color:var(--text);margin:0;">@Model.User?.FullName</p>
+                                            <p style="font-size:0.78rem;color:var(--muted2);margin:0;">@Model.User?.Email</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right column — session details -->
+                                <div class="col-md-8">
+
+                                    <!-- Time & meeting info -->
+                                        <div class="app-card" style="margin-bottom:1rem;">
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                                                <i class="ti ti-calendar-event" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                                                <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Session Info</p>
+                                            </div>
+
+                                            <div style="display:flex;flex-direction:column;gap:0.85rem;">
+
+                                                <div style="display:flex;align-items:center;gap:10px;">
+                                                    <i class="ti ti-calendar" aria-hidden="true" style="color:var(--blue);font-size:1rem;width:20px;"></i>
+                                                    <div>
+                                                        <p style="font-size:0.72rem;color:var(--muted);margin:0;">Date</p>
+                                                        <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">
+                                                            @Model.TimeSlot?.StartTime.ToString("dddd, MMMM dd yyyy")
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div style="display:flex;align-items:center;gap:10px;">
+                                                    <i class="ti ti-clock" aria-hidden="true" style="color:var(--blue);font-size:1rem;width:20px;"></i>
+                                                    <div>
+                                                        <p style="font-size:0.72rem;color:var(--muted);margin:0;">Time</p>
+                                                        <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">
+                                                            @Model.TimeSlot?.StartTime.ToString("h:mm tt") — @Model.TimeSlot?.EndTime.ToString("h:mm tt")
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                @if (!string.IsNullOrWhiteSpace(Model.MeetingUrl))
+                                                {
+                                                    <div style="display:flex;align-items:center;gap:10px;">
+                                                        <i class="ti ti-video" aria-hidden="true" style="color:var(--blue);font-size:1rem;width:20px;"></i>
+                                                        <div>
+                                                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">Meeting link</p>
+                                                            <a href="@Model.MeetingUrl" target="_blank"
+                                                               style="font-size:0.875rem;font-weight:500;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                                                                Join session <i class="ti ti-external-link" aria-hidden="true" style="font-size:0.8rem;"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div style="display:flex;align-items:center;gap:10px;">
+                                                        <i class="ti ti-video-off" aria-hidden="true" style="color:var(--muted);font-size:1rem;width:20px;"></i>
+                                                        <div>
+                                                            <p style="font-size:0.72rem;color:var(--muted);margin:0;">Meeting link</p>
+                                                            <p style="font-size:0.875rem;color:var(--muted2);margin:0;">Not set yet</p>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                            </div>
+                                        </div>
+
+                                        <!-- Candidate notes -->
+                                            <div class="app-card" style="margin-bottom:1rem;">
+                                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border);">
+                                                    <i class="ti ti-notes" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                                                    <p style="font-size:0.95rem;font-weight:600;color:var(--text);margin:0;">Candidate Notes</p>
+                                                </div>
+
+                                                @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                                                {
+                                                    <p style="font-size:0.875rem;color:var(--muted2);line-height:1.7;margin:0;">@Model.Notes</p>
+                                                }
+                                                else
+                                                {
+                                                    <p style="font-size:0.875rem;color:var(--muted);margin:0;font-style:italic;">No notes provided by the candidate.</p>
+                                                }
+                                            </div>
+
+                                            <!-- Actions -->
+                                                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+
+                                                    @if (Model.Status == LandIt.Models.BookingStatus.Confirmed)
+                                                    {
+                                                        <form method="post" asp-action="CompleteSession" asp-route-id="@Model.Id"
+                                                              onsubmit="return confirm('Mark this session as completed?');"
+                                                              style="margin:0;">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit"
+                                                                    class="btn-primary"
+                                                                    style="display:inline-flex;align-items:center;gap:6px;padding:0.65rem 1.25rem;">
+                                                                <i class="ti ti-rosette" aria-hidden="true"></i> Mark as Completed
+                                                            </button>
+                                                        </form>
+                                                    }
+
+                                                    @if (Model.Status == LandIt.Models.BookingStatus.Pending)
+                                                    {
+                                                        <form method="post" asp-action="ApproveBooking"
+                                                              style="margin:0;">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@Model.Id" />
+                                                            <button type="submit"
+                                                                    class="btn-primary"
+                                                                    style="display:inline-flex;align-items:center;gap:6px;padding:0.65rem 1.25rem;">
+                                                                <i class="ti ti-circle-check" aria-hidden="true"></i> Approve
+                                                            </button>
+                                                        </form>
+
+                                                        <form method="post" asp-action="RejectBooking"
+                                                              onsubmit="return confirm('Reject this booking?');"
+                                                              style="margin:0;">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@Model.Id" />
+                                                            <button type="submit"
+                                                                    style="background:none;border:0.5px solid rgba(239,68,68,0.35);color:#dc2626;font-size:0.875rem;padding:0.65rem 1.25rem;border-radius:10px;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:6px;">
+                                                                <i class="ti ti-circle-x" aria-hidden="true"></i> Reject
+                                                            </button>
+                                                        </form>
+                                                    }
+
+                                                    <a href="@Url.Action("Bookings", "Recruiter")"
+                                                       class="btn-ghost"
+                                                       style="display:inline-flex;align-items:center;gap:6px;padding:0.65rem 1.25rem;text-decoration:none;">
+                                                        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to Bookings
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>

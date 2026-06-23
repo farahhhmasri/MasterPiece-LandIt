@@ -1,0 +1,38 @@
+@inject Microsoft.AspNetCore.Identity.SignInManager<LandIt.Models.AppUser> SignInManager
+@inject Microsoft.AspNetCore.Identity.UserManager<LandIt.Models.AppUser> UserManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var page = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    string cls(string match) => page.EndsWith(match) ? "active" : "";
+}
+
+@if (isAdmin)
+{
+    <nav class="admin-nav">
+        <a class="@cls("/Manage/Index")"            id="profile"          asp-page="./Index"><i class="ti ti-user"></i>Profile</a>
+        <a class="@cls("/Manage/Email")"            id="email"            asp-page="./Email"><i class="ti ti-mail"></i>Email</a>
+        <a class="@cls("/Manage/ChangePassword")"   id="change-password"  asp-page="./ChangePassword"><i class="ti ti-lock"></i>Password</a>
+        @if (hasExternalLogins)
+        {
+            <a class="@cls("/Manage/ExternalLogins")" id="external-logins" asp-page="./ExternalLogins"><i class="ti ti-plug"></i>External logins</a>
+        }
+        <a class="@cls("/Manage/TwoFactorAuthentication")" id="two-factor" asp-page="./TwoFactorAuthentication"><i class="ti ti-shield-lock"></i>Two-factor auth</a>
+        <a class="@cls("/Manage/PersonalData")"     id="personal-data"    asp-page="./PersonalData"><i class="ti ti-database"></i>Personal data</a>
+    </nav>
+}
+else
+{
+    <ul class="nav nav-pills flex-column">
+        <li class="nav-item"><a class="nav-link @cls("/Manage/Index")"          id="profile"          asp-page="./Index">Profile</a></li>
+        <li class="nav-item"><a class="nav-link @cls("/Manage/Email")"          id="email"            asp-page="./Email">Email</a></li>
+        <li class="nav-item"><a class="nav-link @cls("/Manage/ChangePassword")" id="change-password"  asp-page="./ChangePassword">Password</a></li>
+        @if (hasExternalLogins)
+        {
+            <li id="external-logins" class="nav-item"><a class="nav-link @cls("/Manage/ExternalLogins")" asp-page="./ExternalLogins">External logins</a></li>
+        }
+        <li class="nav-item"><a class="nav-link @cls("/Manage/TwoFactorAuthentication")" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
+        <li class="nav-item"><a class="nav-link @cls("/Manage/PersonalData")"   id="personal-data"    asp-page="./PersonalData">Personal data</a></li>
+    </ul>
+}

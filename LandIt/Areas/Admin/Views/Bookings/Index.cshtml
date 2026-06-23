@@ -1,0 +1,163 @@
+@model IEnumerable<LandIt.Models.Booking>
+@{
+    ViewData["Title"] = "Bookings";
+    var f = ViewBag.Filter as string;
+    var status = ViewBag.Status as string;
+    int unpaidCount = (int)(ViewBag.UnpaidCount ?? 0);
+    decimal unpaidAmt = (decimal)(ViewBag.UnpaidAmount ?? 0m);
+
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" :
+        string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+
+    string Tone(LandIt.Models.BookingStatus s) => s switch
+    {
+        LandIt.Models.BookingStatus.Completed => "success",
+        LandIt.Models.BookingStatus.Confirmed => "success",
+        LandIt.Models.BookingStatus.Pending => "warning",
+        LandIt.Models.BookingStatus.Cancelled => "danger",
+        _ => "neutral"
+    };
+}
+
+<div class="page-head">
+    <div>
+        <h1>Bookings</h1>
+        <div class="sub">@Model.Count() bookings · cancel or remove sessions.</div>
+    </div>
+    @if (unpaidCount > 0)
+    {
+        <div class="alert-inline warning">
+            <i class="ti ti-cash"></i>
+            <strong>@unpaidCount</strong> unpaid payout@(unpaidCount > 1 ? "s" : "")
+            totalling <strong>$@unpaidAmt.ToString("N2")</strong> due to recruiters.
+            <a asp-action="Index" asp-route-filter="unpaid">View unpaid →</a>
+        </div>
+    }
+</div>
+
+<div class="toolbar">
+    <div class="filter-tabs">
+        <a class="@(string.IsNullOrEmpty(f) && string.IsNullOrEmpty(status) ? "active" : "")"
+           asp-action="Index">All</a>
+        @foreach (var s in Enum.GetNames<LandIt.Models.BookingStatus>())
+        {
+            <a class="@(status == s ? "active" : "")"
+               asp-action="Index" asp-route-status="@s">@s</a>
+        }
+        <a class="@(f == "unpaid" ? "active" : "")"
+           asp-action="Index" asp-route-filter="unpaid">
+            Unpaid
+            @if (unpaidCount > 0)
+            {
+                <span class="badge warning" style="margin-left:4px;">@unpaidCount</span>
+            }
+        </a>
+    </div>
+</div>
+
+<div class="card-x no-pad">
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th>Booking</th>
+                <th>Candidate</th>
+                <th>Recruiter</th>
+                <th>Slot</th>
+                <th>Payment</th>
+                <th>Recruiter earns</th>
+                <th>Payout</th>
+                <th>Status</th>
+                <th class="right-align">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-state">
+                            <i class="ti ti-calendar-off"></i>
+                            <div class="msg">No bookings match this filter.</div>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td class="id-cell">#@b.Id</td>
+                    <td>
+                        <div class="person">
+                            <div class="avatar sm">@Initials(b.User?.FullName)</div>
+                            <div class="meta">
+                                <div class="name">@(b.User?.FullName ?? b.UserId)</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@(b.Recruiter?.FullName ?? "—")</td>
+                    <td class="muted-cell">
+                        @(b.TimeSlot != null ? b.TimeSlot.StartTime.ToString("yyyy-MM-dd HH:mm") : "—")
+                    </td>
+                    <td><span class="badge neutral">@b.PaymentStatus</span></td>
+                    <td>
+                        @if (b.RecruiterEarning > 0)
+                        {
+                            <span>$@b.RecruiterEarning.ToString("N2")</span>
+                        }
+                        else
+                        {
+                            <span class="muted-cell">—</span>
+                        }
+                    </td>
+                    <td>
+                        @if (b.Status == LandIt.Models.BookingStatus.Completed)
+                        {
+                            if (b.IsPaidOut)
+                            {
+                                <span class="badge success">
+                                    <i class="ti ti-check"></i>
+                                    Paid @b.PaidOutAt?.ToString("MM/dd/yy")
+                                </span>
+                            }
+                            else
+                            {
+                                <form asp-action="MarkAsPaid" asp-route-id="@b.Id" method="post"
+                                      onsubmit="return confirm('Mark $@b.RecruiterEarning.ToString("N2") as paid to @(b.Recruiter?.FullName ?? "recruiter")?');">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn sm primary">
+                                        <i class="ti ti-cash"></i> Mark paid
+                                    </button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <span class="muted-cell">—</span>
+                        }
+                    </td>
+                    <td><span class="badge @Tone(b.Status)">@b.Status</span></td>
+                    <td>
+                        <div class="actions-row">
+                            @if (b.Status != LandIt.Models.BookingStatus.Cancelled)
+                            {
+                                <form asp-action="Cancel" asp-route-id="@b.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn sm warning-soft">
+                                        <i class="ti ti-ban"></i> Cancel
+                                    </button>
+                                </form>
+                            }
+                            <form asp-action="Delete" asp-route-id="@b.Id" method="post"
+                                  onsubmit="return confirm('Delete booking?');">
+                                @Html.AntiForgeryToken()
+                                <button class="btn sm danger-soft">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

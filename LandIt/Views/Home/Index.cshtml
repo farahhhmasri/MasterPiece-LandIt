@@ -1,0 +1,297 @@
+﻿
+
+@{
+    ViewData["Title"] = "Land your next job";
+    ViewData["HideAds"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+    <section class="hero">
+        <div class="hero-badge">
+            <div class="badge-pulse"></div>
+            NOW IN EARLY ACCESS
+        </div>
+
+        <h1>
+            The smartest way<br />
+            to <span class="accent">land your</span><br />
+            <span class="dim">next job</span>
+        </h1>
+
+        <p class="hero-sub">
+            Live mock interviews with real recruiters, AI-powered question prep,
+            and instant ATS resume scoring — all in one platform.
+        </p>
+
+        <div class="hero-ctas">
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/Account/DashboardRouter" class="btn-primary btn-large">
+                    Go to Dashboard
+                </a>
+            }
+            else
+            {
+                <a href="/Account/Register" class="btn-primary btn-large">Start for free</a>
+            }
+
+            <a href="#how-it-works" class="btn-ghost">See how it works →</a>
+        </div>
+    </section>
+
+    <!--Statistics-->
+    @{
+        var mockInterviews = (int)(ViewBag.MockInterviewsDone ?? 0);
+        var recruiters = (int)(ViewBag.VerifiedRecruiters ?? 0);
+        var resumes = (int)(ViewBag.ResumesOptimised ?? 0);
+        var successRate = (double)(ViewBag.SuccessRate ?? 0);
+    }
+
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-number">@(mockInterviews > 1000 ? $"{mockInterviews / 1000}k+" : $"{mockInterviews:N0}+")</div>
+            <div class="stat-label">Mock interviews done</div>
+        </div>
+        @* <div class="stat-item">
+            <div class="stat-number">@(successRate > 0 ? $"{successRate:F0}%" : "—")</div>
+            <div class="stat-label">Interview success rate</div>
+        </div> *@
+        <div class="stat-item">
+            <div class="stat-number">@recruiters+</div>
+            <div class="stat-label">Verified recruiters</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">@(resumes > 1000 ? $"{resumes / 1000}k+" : $"{resumes:N0}+")</div>
+            <div class="stat-label">Resumes optimised</div>
+        </div>
+    </div>
+
+    <!--Website Features-->
+    <section class="features-section" id="features">
+        <div class="sec-eyebrow">What we offer</div>
+        <div class="sec-title">Everything to walk in ready</div>
+
+        <div class="feat-grid">
+
+            <!--Overview 1 to 1 demos--> 
+            <div class="feat-card feat-card-wide">
+                <div class="feat-icon">
+                    <i class="ti ti-video" aria-hidden="true"></i>
+                </div>
+                <div class="feat-tag">Live sessions</div>
+                <div class="feat-title">1-on-1 mock interviews with real recruiters</div>
+                <p class="feat-desc" style="max-width:520px">
+                    Book a session with verified recruiters from top companies. Get real-time feedback
+                    on your answers, communication style, and confidence — not an AI simulation.
+                </p>
+                <div class="feat-arrow">
+                    <i class="ti ti-arrow-up-right" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <!-- ATS analyzer card-->
+            <div class="feat-card">
+                <div class="feat-icon">
+                    <i class="ti ti-file-text" aria-hidden="true"></i>
+                </div>
+                <div class="feat-tag">Resume</div>
+                <div class="feat-title">Instant ATS score &amp; resume rewrite</div>
+                <p class="feat-desc">
+                    Upload your resume and get a full ATS compatibility report plus an
+                    AI-rewritten version optimised for your exact role.
+                </p>
+                <div class="feat-arrow">
+                    <i class="ti ti-arrow-up-right" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            <!-- Question Generation card-->
+            <div class="feat-card">
+                <div class="feat-icon">
+                    <i class="ti ti-bulb" aria-hidden="true"></i>
+                </div>
+                <div class="feat-tag">AI-powered</div>
+                <div class="feat-title">Question predictions for your exact role</div>
+                <p class="feat-desc">
+                    Tell us the job title and company, and our AI generates the most likely
+                    interview questions with tailored STAR answer frameworks.
+                </p>
+                <div class="feat-arrow">
+                    <i class="ti ti-arrow-up-right" aria-hidden="true"></i>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!--How it works section-->
+    <section class="how-section" id="how-it-works">
+        <div class="how-inner">
+            <div class="sec-eyebrow">Process</div>
+            <div class="sec-title" style="margin-bottom:0">Three steps to your next offer</div>
+        </div>
+
+        <div class="steps-grid">
+            <div>
+                <div class="step-number">01</div>
+                <div class="step-title">Build your profile</div>
+                <p class="step-desc">
+                    Upload your resume, paste the job description, and tell us
+                    which companies you're targeting.
+                </p>
+            </div>
+            <div>
+                <div class="step-number">02</div>
+                <div class="step-title">Prep with AI</div>
+                <p class="step-desc">
+                    Get your ATS score, an optimised resume, and a personalised
+                    question bank based on your role and experience level.
+                </p>
+            </div>
+            <div>
+                <div class="step-number">03</div>
+                <div class="step-title">Practice live</div>
+                <p class="step-desc">
+                    Book a mock session with a recruiter, receive written feedback,
+                    and track your improvement over time.
+                </p>
+            </div>
+        </div>
+    </section>
+
+
+<!--Testimonials-->
+@{
+    var testimonials = ViewBag.Testimonials as IEnumerable<LandIt.Models.Testimonial>;
+}
+@if (testimonials != null && testimonials.Any())
+{
+    <section class="testimonials-section">
+        <div class="sec-eyebrow">Testimonials</div>
+        <div class="sec-title">What our users say</div>
+
+        
+        
+        <div class="testimonials-slider">
+            <div class="slider-overflow">
+                <div class="slider-track" id="testimonialsTrack">
+                    @foreach (var t in testimonials)
+                    {
+                        var fullName = t.User?.FullName ?? "Anonymous";
+                        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        var initials = string.Concat(parts.Take(2).Select(p => p[0])).ToUpper();
+                        var displayName = parts.Length > 1 ? $"{parts[0]} {parts[1][0]}." : parts[0];
+                        var role = t.Source switch
+                        {
+                            LandIt.Models.TestimonialSource.ATSAnalyzer => "ATS Analyzer user",
+                            LandIt.Models.TestimonialSource.QuestionGenerator => "Question Generator user",
+                            LandIt.Models.TestimonialSource.MockInterview => "Mock interview candidate",
+                            _ => "LandIt user"
+                        };
+                        <div class="quote-card">
+                            <p class="quote-text">"@t.Content"</p>
+                            <div class="quote-author">
+                                <div class="quote-avatar">@initials</div>
+                                <div>
+                                    <div class="quote-name">@displayName</div>
+                                    <div class="quote-role">@role</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>                          
+
+            <div class="slider-arrows">
+                <!-- arrows are OUTSIDE slider-overflow -->
+                <button class="arrow-btn" id="testimonialsPrev" aria-label="Previous">&#8249;</button>
+                <button class="arrow-btn" id="testimonialsNext" aria-label="Next">&#8250;</button>
+            </div>
+            <div class="slider-dots" id="testimonialsDots"></div>
+
+        </div>                              
+
+    
+
+
+
+            
+            
+            
+            
+    </section>
+}
+
+    
+    
+    
+
+
+
+
+    
+    @* <!--CTA-->
+    <section class="cta-section">
+        <div class="cta-box">
+            <div class="cta-glow"></div>
+            <h2>Ready to land it?</h2>
+            <p>Join thousands of candidates who got their offer with LandIt.</p>
+            <div class="email-row">
+                <input class="email-input" type="email" placeholder="your@email.com" id="earlyAccessEmail" />
+                <button class="btn-blue" onclick="handleEarlyAccess()">Get early access</button>
+            </div>
+        </div>
+    </section> *@
+
+
+
+    @section Scripts {
+        <script>
+            function handleEarlyAccess() {
+                var email = document.getElementById('earlyAccessEmail').value;
+                if (!email) return;
+                window.location.href = '/Account/Register?email=' + encodeURIComponent(email);
+            }
+
+
+            (function () {
+            const track = document.getElementById('testimonialsTrack');
+            if (!track) return;
+
+            const cards = track.querySelectorAll('.quote-card');
+            const dotsContainer = document.getElementById('testimonialsDots');
+            let current = 0;
+            let timer;
+
+            // Build dots
+            cards.forEach((_, i) => {
+                const d = document.createElement('button');
+                d.className = 'dot' + (i === 0 ? ' active' : '');
+                d.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+                d.addEventListener('click', () => goTo(i));
+                dotsContainer.appendChild(d);
+            });
+
+            function goTo(n) {
+                current = (n + cards.length) % cards.length;
+                track.style.transform = `translateX(-${current * 100}%)`;
+                dotsContainer.querySelectorAll('.dot').forEach((d, i) =>
+                    d.classList.toggle('active', i === current)
+                );
+                resetTimer();
+            }
+
+            function resetTimer() {
+                clearInterval(timer);
+                timer = setInterval(() => goTo(current + 1), 4000);
+            }
+
+            document.getElementById('testimonialsPrev').addEventListener('click', () => goTo(current - 1));
+            document.getElementById('testimonialsNext').addEventListener('click', () => goTo(current + 1));
+
+            resetTimer();
+        })();
+
+
+        </script>
+    }

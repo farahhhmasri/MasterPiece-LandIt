@@ -1,0 +1,54 @@
+@model IEnumerable<LandIt.Models.ContactMessage>
+@{
+    ViewData["Title"] = "Messages";
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+    var newCount = Model.Count(m => !m.IsRead);
+}
+
+<div class="page-head">
+    <div>
+        <h1>Contact messages</h1>
+        <div class="sub">@newCount new · inbox from the public contact form.</div>
+    </div>
+</div>
+
+<div class="card-x no-pad">
+    <table class="tbl">
+        <thead><tr><th>From</th><th>Subject</th><th>Status</th><th>Date</th><th class="right-align">Actions</th></tr></thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="5"><div class="empty-state"><i class="ti ti-inbox-off"></i><div class="msg">Inbox is empty.</div></div></td></tr>
+            }
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="person">
+                            <div class="avatar sm">@Initials(m.FullName)</div>
+                            <div class="meta">
+                                <div class="name">@m.FullName</div>
+                                <div class="sub">@m.Email</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-weight:@(m.IsRead ? "400" : "600");">@m.Subject</td>
+                    <td>
+                        @if (m.RepliedAt != null) { <span class="badge success">Replied</span> }
+                        else if (!m.IsRead) { <span class="badge info">New</span> }
+                        else { <span class="badge neutral">Read</span> }
+                    </td>
+                    <td class="muted-cell">@m.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <div class="actions-row">
+                            <a asp-action="Details" asp-route-id="@m.Id" class="btn sm secondary"><i class="ti ti-mail"></i> Open</a>
+                            <form asp-action="Delete" asp-route-id="@m.Id" method="post" onsubmit="return confirm('Delete?');">@Html.AntiForgeryToken()
+                                <button class="btn sm danger-soft"><i class="ti ti-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

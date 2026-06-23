@@ -1,0 +1,60 @@
+@model IEnumerable<LandIt.Models.Testimonial>
+@{
+    ViewData["Title"] = "Testimonials";
+    var filter = ViewBag.Filter as string;
+    string Initials(string? n) => string.IsNullOrWhiteSpace(n) ? "?" : string.Concat(n.Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0])).ToUpper();
+}
+
+<div class="page-head">
+    <div>
+        <h1>Testimonials</h1>
+        <div class="sub">Approve user testimonials before they appear on the public site.</div>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="filter-tabs">
+        <a class="@(string.IsNullOrEmpty(filter) ? "active" : "")" asp-action="Index">All</a>
+        <a class="@(filter == "pending" ? "active" : "")" asp-action="Index" asp-route-filter="pending">Pending</a>
+        <a class="@(filter == "approved" ? "active" : "")" asp-action="Index" asp-route-filter="approved">Approved</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-x"><div class="empty-state"><i class="ti ti-message-off"></i><div class="msg">No testimonials match this filter.</div></div></div>
+}
+else
+{
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:14px;">
+        @foreach (var t in Model)
+        {
+            <div class="card-x">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="avatar md">@Initials(t.User?.FullName)</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">@(t.User?.FullName ?? t.UserId)</div>
+                        <div style="font-size:12.5px; color:var(--muted);">@t.CreatedAt.ToString("yyyy-MM-dd") · @t.Source</div>
+                    </div>
+                    @if (t.IsApproved) { <span class="badge success">Approved</span> }
+                    else { <span class="badge warning">Pending</span> }
+                </div>
+                <div style="margin:14px 0;">
+                    <span class="stars"><i class="ti ti-star-filled"></i> @t.Rating</span>
+                </div>
+                <p style="color:var(--muted2); font-size:14px; line-height:1.6; margin:0;">"@t.Content"</p>
+                <div class="actions-row" style="justify-content:flex-start; margin-top:14px;">
+                    <form asp-action="Approve" asp-route-id="@t.Id" method="post">@Html.AntiForgeryToken()
+                        <button class="btn sm success-soft" @(t.IsApproved ? "disabled" : "")><i class="ti ti-check"></i> Approve</button>
+                    </form>
+                    <form asp-action="Reject" asp-route-id="@t.Id" method="post">@Html.AntiForgeryToken()
+                        <button class="btn sm warning-soft" @(!t.IsApproved ? "disabled" : "")><i class="ti ti-x"></i> Reject</button>
+                    </form>
+                    <form asp-action="Delete" asp-route-id="@t.Id" method="post" onsubmit="return confirm('Delete?');">@Html.AntiForgeryToken()
+                        <button class="btn sm danger-soft"><i class="ti ti-trash"></i> Delete</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,180 @@
+﻿@model LandIt.Models.AppUser
+@{
+    ViewData["Title"] = "My Profile";
+    ViewData["UseBootstrap"] = true;
+    ViewData["UseIdentityStyles"] = true;
+    ViewData["HideAds"] = true;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!--Left Column-->
+        <div class="col-md-4">
+            <div class="app-card text-center">
+
+                    @if (!string.IsNullOrEmpty(Model.Photo))
+                    {
+                        <img src="@Model.Photo" alt="@Model.FullName"
+                                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1rem;" />
+                    }
+                    else
+                    {
+                        <div style="width:90px;height:90px;border-radius:50%;background:var(--blue-dim);color:var(--blue);font-size:2rem;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                            @Model.FullName?.Substring(0, 1).ToUpper()
+                        </div>
+                    }
+
+                        <p style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:4px;">@Model.FullName</p>
+                        <p style="font-size:0.82rem;color:var(--muted2);margin-bottom:12px;">@Model.Email</p>
+
+                            <span style="display:inline-block;font-size:0.72rem;font-weight:500;letter-spacing:0.05em;background:var(--blue-dim);color:var(--blue);padding:0.25rem 0.75rem;border-radius:100px;border:0.5px solid rgba(79,142,247,0.3);margin-bottom:1.25rem;">
+                                @(Model.IsRecruiter ? "Recruiter" : "Candidate")
+                            </span>
+
+                            <hr style="border-color:var(--border);" />
+
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="/Account/EditProfile" class="btn-ghost" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;">
+                                        <i class="ti ti-edit" aria-hidden="true"></i> Edit Profile
+                                    </a>
+
+
+                                    @if (ViewBag.CanAddTestimonial == true)
+                                    {
+                                        <a href="/Testimonial/Create"
+                                           class="btn-ghost"
+                                           style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;">
+                                            <i class="ti ti-message-star" aria-hidden="true"></i> Add Testimonial
+                                        </a>
+                                    }
+
+
+                                    <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="margin:0;">
+                                        <button type="submit" class="btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;">
+                                            <i class="ti ti-logout" aria-hidden="true"></i> Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!--Details Card-->
+                                <div class="app-card mt-3">
+                                    <p style="font-size:0.7rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Details</p>
+                                    <div style="display:flex;flex-direction:column;gap:0.85rem;">
+                                        <div style="display:flex;align-items:center;gap:10px;">
+                                            <i class="ti ti-map-pin" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                                            <div>
+                                                <p style="font-size:0.72rem;color:var(--muted);margin:0;">Region</p>
+                                                <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">@Model.Region</p>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex;align-items:center;gap:10px;">
+                                            <i class="ti ti-calendar" aria-hidden="true" style="color:var(--blue);font-size:1.1rem;"></i>
+                                            <div>
+                                                <p style="font-size:0.72rem;color:var(--muted);margin:0;">Member since</p>
+                                                <p style="font-size:0.875rem;font-weight:500;color:var(--text);margin:0;">@Model.CreatedAt?.ToString("MMMM yyyy")</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+        
+        <!--Right Column-->
+        <div class="col-md-8">
+
+            <!-- Upcoming bookings -->
+            <div class="app-card mb-3">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="font-size:0.9rem;font-weight:500;color:var(--text);margin:0;">Upcoming Bookings</p>
+                    <a href="/Account/MyBookings" style="font-size:0.78rem;color:var(--blue);text-decoration:none;">View all</a>
+                </div>
+
+                @if (ViewBag.UpcomingBookings != null && ((IEnumerable<LandIt.Models.Booking>)ViewBag.UpcomingBookings).Any())
+                {
+                    foreach (var booking in (IEnumerable<LandIt.Models.Booking>)ViewBag.UpcomingBookings)
+                    {
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;margin-bottom:8px;">
+                            <i class="ti ti-calendar-event" aria-hidden="true" style="font-size:1.2rem;color:var(--blue);flex-shrink:0;"></i>
+                            <div style="flex:1;min-width:0;">
+                                <p style="font-size:0.85rem;font-weight:500;color:var(--text);margin:0;">@booking.Recruiter?.FullName</p>
+                                <p style="font-size:0.78rem;color:var(--muted2);margin:0;">@booking.TimeSlot?.StartTime.ToString("MMM dd, yyyy · h:mm tt")</p>
+                            </div>
+                            <span style="font-size:0.7rem;font-weight:500;padding:3px 8px;border-radius:100px;background:var(--blue-dim);color:var(--blue);">
+                                @booking.Status
+                            </span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="font-size:0.85rem;color:var(--muted);text-align:center;padding:1rem 0;">No upcoming bookings. <a href="/Account/Dashboard" style="color:var(--blue);">Book a session</a></p>
+                }
+            </div>
+
+            <!-- Stats row -->
+            <div class="row g-3 mb-3">
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-calendar-event" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">
+                            @(ViewBag.BookingsCount ?? 0)
+                        </p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Bookings</p>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-file" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">
+                            @(ViewBag.ResumesCount ?? 0)
+                        </p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Resumes</p>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="app-card text-center">
+                        <i class="ti ti-bulb" aria-hidden="true" style="font-size:1.5rem;color:var(--blue);"></i>
+                        <p style="font-size:1.5rem;font-weight:600;color:var(--text);margin:4px 0 2px;">
+                            @(ViewBag.QuestionsCount ?? 0)
+                        </p>
+                        <p style="font-size:0.75rem;color:var(--muted);margin:0;">Question sets</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent resumes -->
+            <div class="app-card mb-3">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="font-size:0.9rem;font-weight:500;color:var(--text);margin:0;">Recent Resumes</p>
+                    <a href="/Account/MyResumes" style="font-size:0.78rem;color:var(--blue);text-decoration:none;">View all</a>
+                </div>
+
+                @if (ViewBag.RecentResumes != null && ((IEnumerable<LandIt.Models.Resume>)ViewBag.RecentResumes).Any())
+                {
+                    foreach (var resume in (IEnumerable<LandIt.Models.Resume>)ViewBag.RecentResumes)
+                    {
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;margin-bottom:8px;">
+                            <i class="ti ti-file-text" aria-hidden="true" style="font-size:1.2rem;color:var(--blue);flex-shrink:0;"></i>
+                            <div style="flex:1;min-width:0;">
+                                <p style="font-size:0.85rem;font-weight:500;color:var(--text);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@System.IO.Path.GetFileName(resume.FilePath)</p>
+                                @if (resume.ATSResults != null && resume.ATSResults.Any())
+                                {
+                                    <p style="font-size:0.78rem;color:var(--muted2);margin:0;">ATS score: @resume.ATSResults.OrderByDescending(a => a.CreatedAt).First().Score%</p>
+                                }
+                            </div>
+                            <a href="@resume.FilePath" style="font-size:0.78rem;color:var(--blue);text-decoration:none;flex-shrink:0;">
+                                <i class="ti ti-download" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="font-size:0.85rem;color:var(--muted);text-align:center;padding:1rem 0;">No resumes uploaded yet. <a href="/Account/MyResumes" style="color:var(--blue);">Upload one</a></p>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
